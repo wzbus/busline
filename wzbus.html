@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  <style type="text/css">
+  *{
+    margin: 0;
+    padding: 0;
+    box-sizing:border-box;
+    font-family: '微软雅黑';
+  }
+  html, body {
+    height: 100%;
+  }
+  #map {
+    height: 100%;
+  }
+  #set {
+    position: absolute;
+    width: 180px;
+    top: 20px;
+    right: 30px;
+    padding: 10px;
+    background: #F5F3F0;
+    border: 1px solid #5298FF;
+    border-radius: 5px;
+  }
+  .opt {
+    position: relative;
+    margin-top: 10px;
+  }
+  .optTitle {
+    width: 60px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 14px;
+    text-align: center;
+    background-color: #c5464a;
+    color: #fff;
+    border-radius: 5px 0 0 5px;
+  }
+  .opt input, .opt select {
+    position: absolute;
+    width: 100px;
+    height: 28px;
+    left: 60px;
+    top: 0;
+    width: 100px;
+    padding: 0 5px;
+    border: 2px solid #c5464a;
+	  border-radius: 0 5px 5px 0;
+	  background: transparent;
+    direction: rtl;
+  }
+  select {
+    appearance:none;
+    -moz-appearance:none;
+    -webkit-appearance:none;
+  }
+  #busListBtn {
+    margin-top: 10px;
+    width: 62px;
+    height: 28px;
+    color: #fff;
+    background-color: #5298FF;
+    border: none;
+    border-radius: 5px;
+  }
+  </style>
+  <script type="text/javascript" src="https://api.map.baidu.com/getscript?v=3.0&ak=CrkK1Axboq7E3K93fOE0GHfjII2z8Lwf"></script>
+</head>
+
+<body>
+  <div id="map"></div>
+  <div id="set">
+    <div class="opt"> 
+      <p class="optTitle">线路</p>
+      <input type="text" value="B1" id="busList">
+    </div>
+    <div class="opt">
+    <p class="optTitle">上下行</p>
+    <select id="busListItem">
+      <option value="0">上行</option>
+      <option value="1">下行</option>
+    </select>
+  </div>
+  <div class="opt">
+    <p class="optTitle">颜色</p>
+    <input type="color" id="strokeColor" value="#5298FF">
+  </div>
+  <div class="opt">
+    <p class="optTitle">线宽</p>
+    <input type="number" id="strokeWeight" min="1" max="10" step="1" value="8">
+  </div>
+  <div class="opt">
+    <p class="optTitle">透明度</p>
+    <input type="number" id="strokeOpacity" min="0.1" max="1.0" step="0.1" value="0.8">
+  </div>
+  <div class="opt">
+    <p class="optTitle">样式</p>
+    <select id="strokeStyle">
+      <option value="solid">实线</option>
+      <option value="dashed">虚线</option>
+    </select>
+  </div>
+    <button id="busListBtn">新增</button>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript">
+    var map = new BMap.Map("map");
+    map.centerAndZoom("温州",13);
+    map.enableScrollWheelZoom();
+    map.enableKeyboard();
+    map.enableInertialDragging();
+    map.addControl(new BMap.CityListControl({
+      anchor: BMAP_ANCHOR_TOP_LEFT
+    }));
+
+    var stationIcon = new BMap.Icon("http://api0.map.bdimg.com/images/stop_icon.png", new BMap.Size(12, 12));
+
+    var getPolylineOptions = function () {
+      return {
+        strokeColor: $("#strokeColor").val(),
+        strokeWeight: $("#strokeWeight").val(),
+        strokeOpacity: $("#strokeOpacity").val(),
+        strokeStyle: $("#strokeStyle").val()
+      }
+    };
+
+    var bus = new BMap.BusLineSearch(map, {
+      onGetBusListComplete: function (result) {
+        var busListItem = $("#busListItem").val();
+        var fstLine = result.getBusListItem(busListItem);
+        bus.getBusLine(fstLine);
+      },
+      onGetBusLineComplete: function (busline) {
+        var polyline = new BMap.Polyline(busline.getPath(), getPolylineOptions());
+        map.addOverlay(polyline);
+
+        for (var i = 0; i < busline.getNumBusStations(); i++) {
+          var busStation = busline.getBusStation(i);
+          var marker = new BMap.Marker(busStation.position, { icon: stationIcon });
+          map.addOverlay(marker);
+        }
+      }
+    });
+
+    $("#busListBtn").click(function () {
+      bus.getBusList($("#busList").val());
+    });
+  </script>
+</body>
+</html>
