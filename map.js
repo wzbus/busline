@@ -5,31 +5,32 @@
   map.enableKeyboard();map.enableInertialDragging();map.disableDoubleClickZoom();map.addControl(new BMap.CityListControl({anchor:BMAP_ANCHOR_TOP_LEFT}));
   var cr=new BMap.CopyrightControl({anchor:BMAP_ANCHOR_BOTTOM_LEFT,offset:new BMap.Size(472,2)});
   map.addControl(cr);cr.addCopyright({id:1,content:"&copy;温州公交吧 | 中华全知道"});var readyAdd=[];
-  var inputLine,lineColor;var enableEditing=false;var stationIcon=new BMap.Icon("station_icon.png",new BMap.Size(12,12));
+  var inputLine,lineOpacity,polyline;var enableEditing=false;var stationIcon=new BMap.Icon("station_icon.png",new BMap.Size(12,12));
   var getPolylineOptions=function getPolylineOptions(){return{strokeColor:$("#strokeColor").val(),strokeWeight:$("#strokeWeight").val(),strokeOpacity:$("#strokeOpacity").val(),strokeStyle:$("#strokeStyle").val(),enableEditing:enableEditing}
   };var bus=new BMap.BusLineSearch(map,{onGetBusListComplete:function onGetBusListComplete(result){var busListItem=$("#busListItem").val();
-  var fstLine=result.getBusListItem(busListItem);bus.getBusLine(fstLine)},onGetBusLineComplete:function onGetBusLineComplete(busline){var polyline=new BMap.Polyline(busline.getPath(),getPolylineOptions());
+  var fstLine=result.getBusListItem(busListItem);bus.getBusLine(fstLine)},onGetBusLineComplete:function onGetBusLineComplete(busline){polyline=new BMap.Polyline(busline.getPath(),getPolylineOptions());
   var lineName=busline.name.substr(0,busline.name.indexOf("("));map.addOverlay(polyline);
-  for(var i=0;i<busline.getNumBusStations();i++){var busStation=busline.getBusStation(i);
+  if($("#strokeStation").val()=="true"){for(var i=0;i<busline.getNumBusStations();i++){var busStation=busline.getBusStation(i);
   var marker=new BMap.Marker(busStation.position,{icon:stationIcon});map.addOverlay(marker);
-  marker.setTitle(lineName+":"+busStation.name);marker.addEventListener("click",function(e){var opts={width:250,height:80,title:e.target.getTitle().substr(e.target.getTitle().indexOf(":")+1)};
+  marker.enableDragging();marker.setTitle(lineName+":"+busStation.name);marker.addEventListener("click",function(e){var opts={width:250,height:80,title:e.target.getTitle().substr(e.target.getTitle().indexOf(":")+1)};
   var content=busline.name;var infoWindow=new BMap.InfoWindow(content,opts);var point=new BMap.Point(e.target.getPosition().lng,e.target.getPosition().lat);
-  map.openInfoWindow(infoWindow,point)})}polyline.addEventListener("dblclick",function(e){var allOverlay=map.getOverlays();
+  map.openInfoWindow(infoWindow,point)})}}polyline.addEventListener("dblclick",function(e){var allOverlay=map.getOverlays();
   for(var i=0;i<allOverlay.length;i++){if(allOverlay[i].toString()=="[object Marker]"){if(allOverlay[i].getTitle().substr(0,allOverlay[i].getTitle().indexOf(":"))==lineName){allOverlay[i].enableMassClear()
   }else{allOverlay[i].disableMassClear()}}else{allOverlay[i].disableMassClear()}}e.target.enableMassClear();
-  map.clearOverlays();readyAdd.pop(lineName)});polyline.addEventListener("mouseover",function(){lineColor=polyline.getStrokeColor();
-  polyline.setStrokeColor("#c5464a")});polyline.addEventListener("mouseout",function(){polyline.setStrokeColor(lineColor)
+  map.clearOverlays();readyAdd.pop(lineName)});polyline.addEventListener("mouseover",function(e){lineOpacity=e.target.getStrokeOpacity();
+  e.target.setStrokeOpacity("1")});polyline.addEventListener("mouseout",function(e){e.target.setStrokeOpacity(lineOpacity)
   })}});function addLine(line){if($.inArray(line,readyAdd)==-1){bus.getBusList(line);
-  readyAdd.push(line)}else{alert("该路线已添加")}}$("#busList").bind("input propertychange",function(){inputLine=$("#busList").val()
+  readyAdd.push(line)}else{alert("该路线已添加")}}function clear(){map.clearOverlays();readyAdd=[];
+  $("#brtBtn").attr("disabled",false).removeClass("disable")}$("#busList").bind("input propertychange",function(){inputLine=$("#busList").val()
   });$("#busList").focus(function(){inputLine=$("#busList").val();$(this).val("")});
   $("#busList").blur(function(){$(this).val(inputLine)});$("#addBtn").click(function(){var line=$("#busList").val().replace("路","");
-  addLine(line)});$("#searchBtn").click(function(){map.clearOverlays();$("#brtBtn").attr("disabled",false).css("background","#5298FF");
-  var local=new BMap.LocalSearch(map,{pageCapacity:1,renderOptions:{map:map,autoViewport:false},onSearchComplete:function(){var address=local.getResults().getPoi(0).address;
-  console.log(local.getResults());var passBus=address.split(";");for(var i=0;i<passBus.length;
-  i++){addLine(passBus[i])}}});var station=$("#stationList").val()+"-公交站,";local.search(station,{forceLocal:"ture"})
+  addLine(line)});$("#searchBtn").click(function(){clear();var local=new BMap.LocalSearch(map,{pageCapacity:1,renderOptions:{map:map,autoViewport:false},onSearchComplete:function(){var address=local.getResults().getPoi(0).address;
+  var passBus=address.split(";");for(var i=0;i<passBus.length;i++){addLine(passBus[i])
+  }}});var station=$("#stationList").val()+"-公交站,";local.search(station,{forceLocal:"ture"})
   });$("#brtBtn").click(function(){var brtlist=["B1","B2","B3","B4","B101","B102","B103","B104","B105","B106","B107","B108","B109","B111","B112","B113"];
-  readyAdd.push(brtlist);for(var i=0;i<brtlist.length;i++){bus.getBusList(brtlist[i])
-  }$(this).attr("disabled",true).css("background","#999")});$("#clearBtn").click(function(){map.clearOverlays();
-  readyAdd=[];$("#brtBtn").attr("disabled",false).css("background","#5298FF")});$(".set").click(function(){if($(this).next().is(":hidden")){$(this).find(".icon").text("-");
+  for(var i=0;i<brtlist.length;i++){if($.inArray(brtlist[i],readyAdd)==-1){readyAdd.push(brtlist[i]);
+  bus.getBusList(brtlist[i])}}$(this).attr("disabled",true).addClass("disable")});$("#editBtn").click(function(){if(polyline){if($(this).hasClass("disable")==false){polyline.enableEditing();
+  $(this).addClass("disable").text("停用路径编辑")}else{polyline.disableEditing();$(this).removeClass("disable").text("启用路径编辑")
+  }}});$("#clearBtn").click(function(){clear()});$(".set").click(function(){if($(this).next().is(":hidden")){$(this).find(".icon").text("-");
   $(this).siblings(".set").find(".icon").text("+")}else{$(this).find(".icon").text("+")
   }$(this).siblings(".set").next().hide();$(this).next().slideToggle()});
