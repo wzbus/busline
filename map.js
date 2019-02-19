@@ -1,12 +1,12 @@
 "use strict";window.onload=function(){document.onkeydown=function(){var e=window.event||arguments[0];
   if(e.keyCode==123){return false}else{if(e.ctrlKey&&e.shiftKey&&e.keyCode==73){return false
   }else{if(e.ctrlKey&&e.keyCode==85){return false}}}};document.oncontextmenu=function(){return false
-  }};var map=new BMap.Map("map");map.centerAndZoom("温州",13);map.enableScrollWheelZoom();
-  map.enableKeyboard();map.enableInertialDragging();map.disableDoubleClickZoom();map.addControl(new BMap.CityListControl({anchor:BMAP_ANCHOR_TOP_LEFT}));
-  var cr=new BMap.CopyrightControl({anchor:BMAP_ANCHOR_BOTTOM_LEFT,offset:new BMap.Size(472,2)});
+  }};var map=new BMap.Map("map",{enableMapClick:false});map.centerAndZoom("温州",13);
+  map.enableScrollWheelZoom();map.enableKeyboard();map.enableInertialDragging();map.disableDoubleClickZoom();
+  map.addControl(new BMap.CityListControl({anchor:BMAP_ANCHOR_TOP_LEFT}));var cr=new BMap.CopyrightControl({anchor:BMAP_ANCHOR_BOTTOM_LEFT,offset:new BMap.Size(472,2)});
   map.addControl(cr);cr.addCopyright({id:1,content:"&copy;温州公交吧 | 中华全知道"});var readyAdd=[],addPoint=[];
-  var inputLine,lineOpacity,polyline,diyLine,diyStaion;var enableEditing=false;var stationIcon=new BMap.Icon("station_icon.png",new BMap.Size(12,12));
-  var getPolylineOptions=function getPolylineOptions(){return{strokeColor:$("#strokeColor").val(),strokeWeight:$("#strokeWeight").val(),strokeOpacity:$("#strokeOpacity").val(),strokeStyle:$("#strokeStyle").val(),enableEditing:enableEditing}
+  var inputLine,lineOpacity,polyline,diyLine,diyStation,first;var enableEditing=false;
+  var stationIcon=new BMap.Icon("station_icon.png",new BMap.Size(12,12));var getPolylineOptions=function getPolylineOptions(){return{strokeColor:$("#strokeColor").val(),strokeWeight:$("#strokeWeight").val(),strokeOpacity:$("#strokeOpacity").val(),strokeStyle:$("#strokeStyle").val(),enableEditing:enableEditing}
   };var bus=new BMap.BusLineSearch(map,{onGetBusListComplete:function onGetBusListComplete(result){var busListItem=$("#busListItem").val();
   var fstLine=result.getBusListItem(busListItem);bus.getBusLine(fstLine)},onGetBusLineComplete:function onGetBusLineComplete(busline){polyline=new BMap.Polyline(busline.getPath(),getPolylineOptions());
   var lineName=busline.name.substr(0,busline.name.indexOf("("));map.addOverlay(polyline);
@@ -32,17 +32,18 @@
   for(var i=0;i<brtlist.length;i++){if($.inArray(brtlist[i],readyAdd)==-1){readyAdd.push(brtlist[i]);
   bus.getBusList(brtlist[i])}}$(this).attr("disabled",true).addClass("disable")});$("#editBtn").click(function(){if(polyline){if($(this).hasClass("disable")==false){polyline.enableEditing();
   $(this).addClass("disable").text("停用路径编辑")}else{polyline.disableEditing();$(this).removeClass("disable").text("启用路径编辑")
-  }}});$("#clearBtn").click(function(){clear()});$("#drawBtn").click(function(){diyLine=true;
-  map.setDefaultCursor("crosshair");map.addEventListener("dblclick",function(){map.setDefaultCursor("default");
-  polyline=new BMap.Polyline(addPoint,getPolylineOptions());for(var i=0;i<map.getOverlays().length;
-  i++){map.clearOverlays()}map.addOverlay(polyline);addPoint=[];diyLine=false;$("#editBtn").removeClass("disable")
-  });map.addEventListener("click",function(e){if(diyLine){var point=new BMap.Point(e.point.lng,e.point.lat);
+  }}});$("#clearBtn").click(function(){clear()});$("#drawBtn").click(function(){diyLine=first=true;
+  map.setDefaultCursor("crosshair");map.addEventListener("click",function(e){if(diyLine){var point=new BMap.Point(e.point.lng,e.point.lat);
   addPoint.push(point);var polyline=new BMap.Polyline(addPoint,getPolylineOptions());
-  map.addOverlay(polyline);polyline.enableMassClear()}})});$("#stationBtn").click(function(){diyStation=true;
-  map.addEventListener("click",function(e){if(diyStation){map.setDefaultCursor("pointer");
+  map.addOverlay(polyline);if(first){var point=new BMap.Point(e.point.lng,e.point.lat);
+  var marker=new BMap.Marker(point,{icon:stationIcon});map.addOverlay(marker);var label=new BMap.Label("起点",{offset:new BMap.Size(15,-5)});
+  marker.setLabel(label);first=false}}});map.addEventListener("dblclick",function(){if(!first){map.setDefaultCursor("default");
+  for(var i=0;i<map.getOverlays().length;i++){map.clearOverlays()}polyline=new BMap.Polyline(addPoint,getPolylineOptions());
+  polyline.disableMassClear();map.addOverlay(polyline);addPoint=[];diyLine=false;$("#editBtn").removeClass("disable");
+  first=true}})});$("#stationBtn").click(function(){diyStation=true;map.addEventListener("click",function(e){if(diyStation){map.setDefaultCursor("pointer");
   var point=new BMap.Point(e.point.lng,e.point.lat);var marker=new BMap.Marker(point,{icon:stationIcon});
   map.addOverlay(marker)}});map.addEventListener("dblclick",function(){diyStation=false
-  })});$(".set").click(function(){diyLine=diyStaion=false;map.setDefaultCursor("default");
+  })});$(".set").click(function(){diyLine=diyStation=false;map.setDefaultCursor("default");
   if($(this).next().is(":hidden")){$(this).find(".icon").text("-");$(this).siblings(".set").find(".icon").text("+")
   }else{$(this).find(".icon").text("+")}$(this).siblings(".set").next().hide();$(this).next().slideToggle()
   });
