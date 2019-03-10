@@ -2,7 +2,6 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>数字华容道</title>
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
@@ -28,6 +27,7 @@
           <span class="info">步数:</span>
           <div class="count">{{c}}</div>
         </div>
+        <p class="succ" v-show="this.succ">挑战成功!</p>
       </div>
     </div>
     <div class="list-wrap">
@@ -41,7 +41,6 @@
       <button class="btn" @click="sort">开始新游戏</button>
       <button class="btn" @click="replay">重玩本局</button>
     </div>
-    <p class="succ" v-show="this.succ">挑战成功!</p>
   </div>
 </body>
 
@@ -85,6 +84,7 @@
           this.list = []
           this.list = this.list.concat(this.tempArr)
           this.list.push('')
+          this.succ = false
           this.start = true
           this.t = setInterval(this.timer, 10)
         } else {
@@ -92,10 +92,11 @@
         }
       },
       replay() {
-        if (this.start) {
+        if (this.start || this.succ) {
           this.list = []
           this.list = this.list.concat(this.tempArr)
           this.list.push('')
+          this.succ = false
           clearInterval(this.t)
           this.ms = this.s = this.min = this.c = 0
           this.t = setInterval(this.timer, 10)
@@ -157,6 +158,7 @@
   * {
     margin: 0;
     padding: 0;
+    -webkit-tap-highlight-color: transparent;
   }
 
   html {
@@ -185,6 +187,7 @@
   }
 
   .right {
+    position: relative;
     width: 65%;
     padding-left: 20px;
   }
@@ -210,6 +213,15 @@
     background-color: #fff;
     border-radius: 2px;
     display: inline-block;
+    text-align: center;
+  }
+
+  .succ {
+    position: absolute;
+    top: 35px;
+    left: 120px;
+    color: #f00;
+    font-size: 20px;
     text-align: center;
   }
 
@@ -278,13 +290,6 @@
     background-image: url('img/btn.jpg');
     background-size: cover;
     outline: 0
-  }
-
-  .succ {
-    margin-top: 15px;
-    color: #f00;
-    font-size: 32px;
-    text-align: center;
   }
 </style>
 
