@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>数字华容道</title>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+</head>
+
+<body>
+  <div id="app" class="container">
+    <div class="header">
+      <div class="left">
+        <p>模式</p>
+        <div class="mode">4 × 4</div>
+      </div>
+      <div class="right">
+        <div class="time-wrap">
+          <span class="info">计时:</span>
+          <div class="timer">
+            <div class="count">{{min}}</div><span class="colon">:</span>
+            <div class="count">{{s}}</div><span class="colon">:</span>
+            <div class="count">{{ms}}</div>
+          </div>
+        </div>
+        <div class="count-wrap">
+          <span class="info">步数:</span>
+          <div class="count">{{c}}</div>
+        </div>
+      </div>
+    </div>
+    <div class="list-wrap">
+      <ul>
+        <li :class="item?'full':'empty'" v-for="(item,index) in list" :key="index" @click="move(index)">
+          <span class="num">{{item}}</span>
+        </li>
+      </ul>
+    </div>
+    <div class="btn-wrap">
+      <button class="btn" @click="sort">开始新游戏</button>
+      <button class="btn" @click="replay">重玩本局</button>
+    </div>
+    <p class="succ" v-show="this.succ">挑战成功!</p>
+  </div>
+</body>
+
+<script src="js/vue.min.js"></script>
+<script>
+  new Vue({
+    el: '#app',
+    data() {
+      return {
+        list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, ''],
+        tempArr: [],
+        t: 0,
+        min: 0,
+        s: 0,
+        ms: 0,
+        c: 0,
+        start: false,
+        succ: false
+      }
+    },
+    methods: {
+      sort() {
+        clearInterval(this.t)
+        this.ms = this.s = this.min = this.c = 0
+        const m = this.list.filter(n => n)
+        this.tempArr = m.sort(() => {
+          return Math.random() - 0.5
+        })
+        let k = 0
+        for (let i = 0; i < 14; i++) {
+          for (let j = i + 1; j < 15; j++) {
+            if (this.tempArr[i] > this.tempArr[j]) {
+              k++;
+            }
+          }
+        }
+        this.init(k)
+      },
+      init(k) {
+        if (k % 2 === 0) {
+          this.list = []
+          this.list = this.list.concat(this.tempArr)
+          this.list.push('')
+          this.start = true
+          this.t = setInterval(this.timer, 10)
+        } else {
+          this.sort()
+        }
+      },
+      replay() {
+        if (this.start) {
+          this.list = []
+          this.list = this.list.concat(this.tempArr)
+          this.list.push('')
+          clearInterval(this.t)
+          this.ms = this.s = this.min = this.c = 0
+          this.t = setInterval(this.timer, 10)
+        }
+      },
+      timer() {
+        this.ms += 1
+        if (this.ms >= 100) {
+          this.ms = 0
+          this.s += 1
+        }
+        if (this.s >= 60) {
+          this.s = 0
+          this.min += 1
+        }
+      },
+      move(index) {
+        if (this.start) {
+          const curNum = this.list[index],
+            leftNum = this.list[index - 1],
+            rightNum = this.list[index + 1],
+            topNum = this.list[index - 4],
+            bottomNum = this.list[index + 4]
+          if (leftNum === '') {
+            this.$set(this.list, index - 1, curNum)
+            this.$set(this.list, index, '')
+            this.c++
+          } else if (rightNum === '') {
+            this.$set(this.list, index + 1, curNum)
+            this.$set(this.list, index, '')
+            this.c++
+          } else if (topNum === '') {
+            this.$set(this.list, index - 4, curNum)
+            this.$set(this.list, index, '')
+            this.c++
+          } else if (bottomNum === '') {
+            this.$set(this.list, index + 4, curNum)
+            this.$set(this.list, index, '')
+            this.c++
+          }
+          if (this.list[15] === '') {
+            this.check()
+          }
+        }
+      },
+      check() {
+        const m = this.list.filter(n => n)
+        const succ = m.every((e, i) => e === i + 1)
+        if (succ) {
+          clearInterval(this.t)
+          this.succ = true
+          this.start = false
+        }
+      }
+    }
+  })
+</script>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    height: 100%;
+    background-image: url('img/bg.jpg');
+    background-size: cover;
+  }
+
+  .header {
+    padding: 30px 20px;
+    font-size: 16px;
+    display: flex;
+  }
+
+  .left {
+    width: 35%;
+    text-align: center;
+  }
+
+  .mode {
+    width: 75%;
+    line-height: 25px;
+    margin: 5px auto 0;
+    border-radius: 5px;
+    background-color: #fff;
+  }
+
+  .right {
+    width: 65%;
+    padding-left: 20px;
+  }
+
+  .container {
+    width: 100%;
+  }
+
+  .timer {
+    display: inline-block;
+  }
+
+  .colon {
+    margin-left: 5px;
+  }
+
+  .count-wrap {
+    margin-top: 10px;
+  }
+
+  .count {
+    width: 30px;
+    background-color: #fff;
+    border-radius: 2px;
+    display: inline-block;
+    text-align: center;
+  }
+
+  .list-wrap {
+    width: 100%;
+    text-align: center;
+    background-image: url('img/btn.jpg');
+    background-size: cover;
+    border-radius: 10px;
+  }
+
+  ul {
+    width: calc(100% - 30px);
+    margin: 0 auto;
+    padding: 15px 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  li {
+    position: relative;width: 25%;
+    height: 0;
+    padding-bottom: 25%;
+    font-size: 48px;
+    font-weight: 700;
+    font-family: '方正舒体';
+    color: #824A3A;
+    border: 1px solid #824A3A;
+    box-sizing: border-box;
+    box-shadow: 2px 2px 4px inset;
+    cursor: pointer;
+  }
+
+  .num {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .full {
+    background-image: url('img/block.jpg');
+    text-shadow: 2px 2px 4px #DA9D57;
+  }
+
+  .empty {
+    background: #000;
+    opacity: 0.5;
+    box-shadow: 2px 2px 20px inset;
+  }
+
+  .btn-wrap {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .btn {
+    width: 35%;
+    height: 40px;
+    color: #fff;
+    font-size: 18px;
+    border-radius: 20px;
+    border: 0;
+    background-image: url('img/btn.jpg');
+    background-size: cover;
+    outline: 0
+  }
+
+  .succ {
+    margin-top: 15px;
+    color: #f00;
+    font-size: 32px;
+    text-align: center;
+  }
+</style>
+
+</html>
