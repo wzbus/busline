@@ -2,9 +2,9 @@
 <html>
 
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge, chrome=1; charset=utf-8" />
   <title>数字华容道</title>
-  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 </head>
 
 <body>
@@ -16,7 +16,7 @@
       </div>
       <div class="right">
         <div class="time-wrap">
-          <span class="info">计时:</span>
+          <span class="info info1">计时<span class="colon">:</span></span>
           <div class="timer">
             <div class="count">{{min}}</div><span class="colon">:</span>
             <div class="count">{{s}}</div><span class="colon">:</span>
@@ -24,15 +24,41 @@
           </div>
         </div>
         <div class="count-wrap">
-          <span class="info">步数:</span>
+          <span class="info">步数<span class="colon">:</span></span>
           <div class="count">{{c}}</div>
         </div>
         <p class="succ" v-show="this.succ">挑战成功!</p>
       </div>
+      <div class="rank-wrap">
+        <p class="rank">最高记录</p>
+        <ul class="rank-ul">
+          <li class="rank-li">
+            <img src="img/no1.png" width="20" height="20" />
+            <span class="score">
+              <span v-if="score[0]">{{score[0]}}</span>
+              <span v-if="!score[0]">未记录</span>
+            </span>
+          </li>
+          <li class="rank-li">
+            <img src="img/no2.png" width="20" height="20" />
+            <span class="score">
+              <span v-if="score[1]">{{score[1]}}</span>
+              <span v-if="!score[1]">未记录</span>
+            </span>
+          </li>
+          <li class="rank-li">
+            <img src="img/no3.png" width="20" height="20" />
+            <span class="score">
+              <span v-if="score[2]">{{score[2]}}</span>
+              <span v-if="!score[2]">未记录</span>
+            </span>
+          </li>
+        </ul>
+      </div>
     </div>
     <div class="list-wrap">
-      <ul>
-        <li :class="item?'full':'empty'" v-for="(item,index) in list" :key="index" @click="move(index)">
+      <ul class="list-ul">
+        <li class="list-li" :class="item?'full':'empty'" v-for="(item,index) in list" :key="index" @click="move(index)">
           <span class="num">{{item}}</span>
         </li>
       </ul>
@@ -46,7 +72,7 @@
 
 <script src="js/vue.min.js"></script>
 <script>
-  new Vue({
+var vm = new Vue({
     el: '#app',
     data() {
       return {
@@ -58,7 +84,9 @@
         ms: 0,
         c: 0,
         start: false,
-        succ: false
+        succ: false,
+        score: [],
+        record: []
       }
     },
     methods: {
@@ -112,6 +140,9 @@
           this.s = 0
           this.min += 1
         }
+        if (this.min >=60) {
+          clearInterval(this.t)
+        }
       },
       move(index) {
         if (this.start) {
@@ -149,7 +180,51 @@
           clearInterval(this.t)
           this.succ = true
           this.start = false
+          let newScore = this.min + '′' + this.s + '″' + this.ms
+          let newRecord = 3600000 - (this.min * 60000 + this.s * 1000 + this.ms * 10)
+          if (newRecord > this.record[2]) {
+            if (newRecord > this.record[1]) {
+              if (newRecord > this.record[0]) {
+                this.score[2] = this.score[1]
+                this.score[1] = this.score[0]
+                this.score[0] = newScore
+                localStorage.setItem('score', JSON.stringify(this.score))
+                this.calRecord()
+              } else {
+                this.score[2] = this.score[1]
+                this.score[1] = newScore
+                localStorage.setItem('score', JSON.stringify(this.score))
+                this.calRecord()
+              }
+            } else {
+              this.score[2] = newScore
+              localStorage.setItem('score', JSON.stringify(this.score))
+              this.calRecord()
+            }
+          } else {
+            return false
+          }
         }
+      },
+      calRecord() {
+        let len = this.score.filter(n => n).length
+        for (let i = 0; i < len; i++) {
+          let syb1 = this.score[i].indexOf("′")
+          let syb2 = this.score[i].indexOf("″")
+          let min = this.score[i].substring(0, syb1)
+          let s = this.score[i].substring(syb1 + 1, syb2)
+          let ms = this.score[i].substring(syb2 + 1)
+          this.record.push(min * 60000 + s * 1000 + ms * 10)
+        }
+        for (let i = 0; i < 3 - len; i++) {
+          this.record.push(0)
+        }
+      }
+    },
+    mounted() {
+      if (localStorage.getItem('score')) {
+        this.score = JSON.parse(localStorage.getItem('score')).filter(n => n)
+        this.calRecord()
       }
     }
   })
@@ -158,46 +233,130 @@
   * {
     margin: 0;
     padding: 0;
+    list-style: none;
     -webkit-tap-highlight-color: transparent;
   }
 
   html {
+    width: 100%;
     height: 100%;
     background-image: url('img/bg.jpg');
     background-size: cover;
   }
 
-  .header {
-    padding: 30px 20px;
-    font-size: 16px;
-    display: flex;
+  @media screen and (max-width:768px) {
+    .container {
+      width: 100%;
+      height: 100%;
+    }
+
+    .header {
+      padding: 30px 20px;
+      font-size: 16px;
+      display: flex;
+    }
+
+    .left {
+      width: 35%;
+      text-align: center;
+    }
+
+    .right {
+      position: relative;
+      width: 65%;
+      padding-left: 20px;
+    }
+
+    .mode {
+      width: 75%;
+    }
+
+    .timer {
+      display: inline-block;
+    }
+
+    .list-wrap {
+      margin-bottom: 30px;
+    }
+
+    .succ {
+      position: absolute;
+      top: 35px;
+      left: 120px;
+      text-align: center;
+    }
+
+    .rank-wrap {
+      display: none;
+    }
   }
 
-  .left {
-    width: 35%;
-    text-align: center;
+  @media screen and (min-width:768px) {
+    .container {
+      width: 500px;
+      height: 100%;
+      margin: 0 auto;
+    }
+
+    .header {
+      position: fixed;
+      width: calc(50% - 250px);
+      height: 400px;
+      right: 0;
+      margin-top: 100px;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .mode {
+      width: 115px;
+    }
+
+    .info {
+      margin: 10px 0 5px;
+    }
+
+    .info1 {
+      display: block;
+    }
+
+    .list-wrap {
+      margin: 20px 0;
+    }
+
+    .succ {
+      margin-top: 15px;
+    }
+
+    .rank-wrap {
+      position: absolute;
+      left: 50%;
+      bottom: 50px;
+      width: 70%;
+      max-width: 150px;
+      transform: translate(-50%, 0);
+      font-size: 14px;
+      color: #824A3A;
+      background-image: url('img/block.jpg');
+      border: 1px solid #824A3A;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .rank {
+      line-height: 25px;
+    }
+
+    .score {
+      vertical-align: 5px;
+    }
   }
 
   .mode {
-    width: 75%;
     line-height: 25px;
     margin: 5px auto 0;
     border-radius: 5px;
     background-color: #fff;
-  }
-
-  .right {
-    position: relative;
-    width: 65%;
-    padding-left: 20px;
-  }
-
-  .container {
-    width: 100%;
-  }
-
-  .timer {
-    display: inline-block;
   }
 
   .colon {
@@ -217,12 +376,8 @@
   }
 
   .succ {
-    position: absolute;
-    top: 35px;
-    left: 120px;
     color: #f00;
     font-size: 20px;
-    text-align: center;
   }
 
   .list-wrap {
@@ -233,17 +388,17 @@
     border-radius: 10px;
   }
 
-  ul {
+  .list-ul {
     width: calc(100% - 30px);
     margin: 0 auto;
     padding: 15px 0;
-    list-style: none;
     display: flex;
     flex-wrap: wrap;
   }
 
-  li {
-    position: relative;width: 25%;
+  .list-li {
+    position: relative;
+    width: 25%;
     height: 0;
     padding-bottom: 25%;
     font-size: 48px;
@@ -275,7 +430,6 @@
   }
 
   .btn-wrap {
-    margin-top: 30px;
     display: flex;
     justify-content: space-around;
   }
