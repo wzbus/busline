@@ -72,7 +72,7 @@
 
 <script src="js/vue.min.js"></script>
 <script>
-var vm = new Vue({
+  new Vue({
     el: '#app',
     data() {
       return {
@@ -140,7 +140,7 @@ var vm = new Vue({
           this.s = 0
           this.min += 1
         }
-        if (this.min >=60) {
+        if (this.min >= 60) {
           clearInterval(this.t)
         }
       },
@@ -208,13 +208,14 @@ var vm = new Vue({
       },
       calRecord() {
         let len = this.score.filter(n => n).length
+        this.record = []
         for (let i = 0; i < len; i++) {
           let syb1 = this.score[i].indexOf("′")
           let syb2 = this.score[i].indexOf("″")
           let min = this.score[i].substring(0, syb1)
           let s = this.score[i].substring(syb1 + 1, syb2)
           let ms = this.score[i].substring(syb2 + 1)
-          this.record.push(min * 60000 + s * 1000 + ms * 10)
+          this.record.push(3600000 - (min * 60000 + s * 1000 + ms * 10))
         }
         for (let i = 0; i < 3 - len; i++) {
           this.record.push(0)
@@ -224,8 +225,8 @@ var vm = new Vue({
     mounted() {
       if (localStorage.getItem('score')) {
         this.score = JSON.parse(localStorage.getItem('score')).filter(n => n)
-        this.calRecord()
       }
+      this.calRecord()
     }
   })
 </script>
