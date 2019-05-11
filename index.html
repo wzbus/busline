@@ -15,7 +15,7 @@
       <div class="subContainer">
         <div class="opt">
           <p class="optTitle">线路名</p>
-          <input type="text" value="1" id="busList">
+          <input type="text" value="1" id="busList" onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" onpaste="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')">
         </div>
         <div class="opt">
           <p class="optTitle">上下行</p>
@@ -58,7 +58,7 @@
       <div class="subContainer">
         <div class="opt">
           <p class="optTitle">站点名</p>
-          <input type="text" value="八字桥" id="stationList">
+          <input type="text" value="八字桥" id="stationList" onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" onpaste="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')">
         </div>
         <button id="searchBtn">搜索</button>
       </div>
