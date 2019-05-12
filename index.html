@@ -57,8 +57,15 @@
     <div class="sub">
       <div class="subContainer">
         <div class="opt">
-          <p class="optTitle">站点名</p>
+          <p class="optTitle">站名</p>
           <input type="text" value="八字桥" id="stationList" onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" onpaste="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')">
+        </div>
+        <div class="opt">
+          <p class="optTitle">颜色</p>
+          <select id="randomColor">
+            <option value="false">默认</option>
+            <option value="true">随机</option>
+          </select>
         </div>
         <button id="searchBtn">搜索</button>
       </div>
@@ -66,16 +73,15 @@
     <li class="set">DIY模式<span class="icon">+</span></li>
     <div class="sub">
       <div class="subContainer">
-        <button id="drawBtn">添加路径</button>
-        <button id="stationBtn">添加标识</button>
-        <button id="stopBtn" class="disable">完成添加标识</button>
+        <button id="drawLine">添加路径</button>
+        <button id="drawStation">添加标识</button>
+        <button id="editBtn" class="disable">启用路径编辑</button>
       </div>
     </div>
     <li class="set">快捷操作<span class="icon">+</span></li>
     <div class="sub">
       <div class="subContainer">
         <button id="brtBtn">添加所有BRT线路</button>
-        <button id="editBtn" class="disable">启用路径编辑</button>
         <button id="clearBtn">清除所有标识</button>
       </div>
     </div>

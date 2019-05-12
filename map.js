@@ -13,7 +13,7 @@ window.onload = function() {
         }
       }
     }
-  };
+  }
   document.oncontextmenu = function() {
     return false
   }
@@ -40,12 +40,12 @@ cr.addCopyright({
   id: 1,
   content: "&copy;温州公交吧 | 中华全知道"
 });
-var inputLine, inputStation, lineOpacity, currentPolyline, polyline, diyLine, diyStation, first, last, brtlist, readyAdd = [],
-addPoint = [], enableEditing = false, enableAutoViewport = true;
+var inputLine, inputStation, lineOpacity, lineColor, colorOption, currentPolyline, polyline, diyLine, first, last, brtlist, readyAdd = [],
+addPoint = [], num = [], colorList = [], diyStation = false, enableEditing = false, enableAutoViewport = true;
 var stationIcon = new BMap.Icon("station_icon.png", new BMap.Size(12, 12));
 var getPolylineOptions = function getPolylineOptions() {
   return {
-    strokeColor: $("#strokeColor").val(),
+    strokeColor: lineColor,
     strokeWeight: $("#strokeWeight").val(),
     strokeOpacity: $("#strokeOpacity").val(),
     strokeStyle: $("#strokeStyle").val(),
@@ -59,6 +59,19 @@ var bus = new BMap.BusLineSearch(map, {
     bus.getBusLine(fstLine);
   },
   onGetBusLineComplete: function onGetBusLineComplete(busline) {
+    if (colorOption == "true") {
+      randomColor();
+      let color = `rgb(${num[0]},${num[1]},${num[2]})`;
+      num = [];
+      if ($.inArray(color, colorList) == -1) {
+        colorList.push(color);
+        lineColor = color;
+      } else {
+        randomColor();
+      }
+    } else {
+      lineColor = $("#strokeColor").val();
+    }
     polyline = new BMap.Polyline(busline.getPath(), getPolylineOptions());
     let lineName = busline.name.substr(0, busline.name.indexOf("("));
     map.addOverlay(polyline);
@@ -71,7 +84,6 @@ var bus = new BMap.BusLineSearch(map, {
       stationList.push(new BMap.Point(busStation.position.lng, busStation.position.lat));
       if ($("#strokeStation").val() == "true") {
         map.addOverlay(marker);
-        marker.enableDragging();
         marker.setTitle(lineName + ":" + busStation.name);
         marker.addEventListener("click", function(e) {
           let opts = {
@@ -134,6 +146,15 @@ function getCity(res) {
     city = "温州市";
   }
 }
+function randomColor() {
+  let arr1 = ["0", "51", "102", "153", "204"];
+  let arr2 = arr1.sort(() => {
+    return Math.random() - 0.5;
+  })
+  num = arr2.splice(0, 2).concat("255").sort(() => {
+    return Math.random() - 0.5;
+  })
+}
 function addLine(line) {
   if ($.inArray(line, readyAdd) == -1) {
     bus.getBusList(line);
@@ -150,6 +171,7 @@ function clear() {
   map.clearOverlays();
   readyAdd = [];
   addPoint = [];
+  colorList = [];
   $("#brtBtn").attr("disabled", false).removeClass("disable");
   $("#editBtn").addClass("disable").text("启用路径编辑");
   $("#stopBtn").addClass("disable");
@@ -184,10 +206,12 @@ $("#stationList").blur(function() {
 });
 $("#addBtn").click(function() {
   let line = $("#busList").val().replace("路", "");
+  colorOption = "false";
   enableAutoViewport = true;
   addLine(line);
 });
 $("#searchBtn").click(function() {
+  colorOption = $("#randomColor").val();
   enableAutoViewport = false;
   let local = new BMap.LocalSearch(map, {
     pageCapacity: 1,
@@ -205,7 +229,7 @@ $("#searchBtn").click(function() {
       });
       let address = local.getResults().getPoi(0).address;
       let passBus = address.split(";");
-      for (let i = 0, len = passBus.length; i < len; i++) {
+      for (let i = 0, len = passBus.length; i < len; i++) { 
         addLine(passBus[i]);
       }
     }
@@ -216,6 +240,7 @@ $("#searchBtn").click(function() {
   })
 });
 $("#brtBtn").click(function() {
+  let brt = true;
   switch (city) {
     case "杭州市":
       brtlist = ["B1", "B1C", "B1D", "B2", "B2区间", "B2C", "B4", "B4C", "B7", "B8", "B8B", "B支1", "B支1区间", "B支1快线", "B支2", "B支2C", "B支3", "B支3C", "B支4", "B支4快线", "B支7", "B支7C", "B支7D", "B支8"];
@@ -233,16 +258,21 @@ $("#brtBtn").click(function() {
       brtlist = ["快速公交1号线"];
       break;
     default:
+      brt = false;
       alert("该功能只支持浙江省内。如当前城市有BRT线路，请放大地图再试")
     }
-  enableAutoViewport = false;
-  for (let i = 0, len = brtlist.length; i < len; i++) {
-    if ($.inArray(brtlist[i], readyAdd) == -1) {
-      readyAdd.push(brtlist[i]);
-      bus.getBusList(brtlist[i]);
+    if (brt) {
+      clear();
+      colorOption = $("#randomColor").val();
+      enableAutoViewport = false;
+      for (let i = 0, len = brtlist.length; i < len; i++) {
+        if ($.inArray(brtlist[i], readyAdd) == -1) {
+          readyAdd.push(brtlist[i]);
+          bus.getBusList(brtlist[i]);
+        }
+      }
+      $(this).attr("disabled", true).addClass("disable");
     }
-  }
-  $(this).attr("disabled", true).addClass("disable");
 });
 $("#editBtn").click(function() {
   if (polyline) {
@@ -258,12 +288,16 @@ $("#editBtn").click(function() {
 $("#clearBtn").click(function() {
   clear();
 });
-$("#drawBtn").click(function() {
-  diyLine = first = true;
-  diyStation = last = false;
+$("#drawLine").click(function() {
+  $(this).addClass("disable").text("完成路径");
+  $("#drawStation").removeClass("disable").text("添加标识");
+  diyLine = true;
+  first = true;
+  diyStation = false;
+  last = false;
+  lineColor = $("#strokeColor").val();
   map.setDefaultCursor("crosshair");
-  map.addEventListener("click",
-  function(e) {
+  map.addEventListener("click", function(e) {
     if (diyLine) {
       let point = new BMap.Point(e.point.lng, e.point.lat);
       addPoint.push(point);
@@ -284,7 +318,9 @@ $("#drawBtn").click(function() {
     }
   });
   map.addEventListener("dblclick", function(e) {
-    map.setDefaultCursor("default");
+    $("#drawLine").removeClass("disable").text("添加路径");
+    $("#editBtn").removeClass("disable");
+    map.setDefaultCursor("url(http://api0.map.bdimg.com/images/openhand.cur) 8 8, default");
     if (!first) {
       let point = new BMap.Point(e.point.lng, e.point.lat);
       let marker = new BMap.Marker(point, {
@@ -301,37 +337,40 @@ $("#drawBtn").click(function() {
       polyline = new BMap.Polyline(addPoint, getPolylineOptions());
       polyline.disableMassClear();
       map.addOverlay(polyline);
+      readyAdd = [];
       addPoint = [];
       diyLine = false;
-      $("#editBtn").removeClass("disable");
-      first = last = true;
+      first = true;
+      last = true;
     }
   })
 });
-$("#stationBtn").click(function() {
-  diyStation = true;
-  map.setDefaultCursor("pointer");
-  map.addEventListener("click", function(e) {
-    if (diyStation) {
-      let point = new BMap.Point(e.point.lng, e.point.lat);
-      let marker = new BMap.Marker(point, {
-        icon: stationIcon
-      });
-      marker.disableMassClear();
-      map.addOverlay(marker);
-      marker.addEventListener("dblclick",
-      function(e) {
-        e.target.enableMassClear();
-        map.clearOverlays();
-      })
-    }
-  });
-  $("#stopBtn").removeClass("disable");
-});
-$("#stopBtn").click(function() {
-  diyStation = false;
-  $(this).addClass("disable");
-  map.setDefaultCursor("default");
+$("#drawStation").click(function() {
+  $("#drawLine").removeClass("disable").text("添加路径");
+  diyLine = false;
+  diyStation = !diyStation;
+  if (diyStation) {
+    $(this).addClass("disable").text("完成标识");
+    map.setDefaultCursor("pointer");
+    map.addEventListener("click", function(e) {
+      if (diyStation) {
+        let point = new BMap.Point(e.point.lng, e.point.lat);
+        let marker = new BMap.Marker(point, {
+          icon: stationIcon
+        });
+        marker.disableMassClear();
+        marker.enableDragging();
+        map.addOverlay(marker);
+        marker.addEventListener("dblclick", function(e) {
+          e.target.enableMassClear();
+          map.clearOverlays();
+        });
+      }
+    });
+  } else {
+    $(this).removeClass("disable").text("添加标识");
+    map.setDefaultCursor("url(http://api0.map.bdimg.com/images/openhand.cur) 8 8, default");
+  }
 });
 $(".set").click(function() {
   diyLine = diyStation = false;
@@ -344,4 +383,5 @@ $(".set").click(function() {
   }
   $(this).siblings(".set").next().hide();
   $(this).next().slideToggle();
+  map.setDefaultCursor("url(http://api0.map.bdimg.com/images/openhand.cur) 8 8, default");
 });
