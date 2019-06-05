@@ -1,23 +1,23 @@
 "use strict";
-window.onload = function() {
-  document.onkeydown = function() {
-    var e = window.event || arguments[0];
-    if (e.keyCode == 123) {
-      return false
-    } else {
-      if (e.ctrlKey && e.shiftKey && e.keyCode == 73) {
-        return false
-      } else {
-        if (e.ctrlKey && e.keyCode == 85) {
-          return false
-        }
-      }
-    }
-  }
-  document.oncontextmenu = function() {
-    return false
-  }
-};
+// window.onload = function () {
+//   document.onkeydown = function () {
+//     var e = window.event || arguments[0];
+//     if (e.keyCode == 123) {
+//       return false;
+//     } else {
+//       if (e.ctrlKey && e.shiftKey && e.keyCode == 73) {
+//         return false;
+//       } else {
+//         if (e.ctrlKey && e.keyCode == 85) {
+//           return false;
+//         }
+//       }
+//     }
+//   }
+//   document.oncontextmenu = function () {
+//     return false;
+//   }
+// };
 var map = new BMap.Map("map", {
   enableMapClick: false
 });
@@ -32,8 +32,8 @@ map.addControl(new BMap.CityListControl({
   anchor: BMAP_ANCHOR_TOP_LEFT
 }));
 var cr = new BMap.CopyrightControl({
-  anchor: BMAP_ANCHOR_BOTTOM_LEFT,
-  offset: new BMap.Size(472, 2)
+  anchor: BMAP_ANCHOR_BOTTOM_RIGHT,
+  offset: new BMap.Size(5, 2)
 });
 map.addControl(cr);
 cr.addCopyright({
@@ -41,9 +41,9 @@ cr.addCopyright({
   content: "&copy;温州公交吧 | 中华全知道"
 });
 var inputLine, inputStation, lineOpacity, lineColor, colorOption, currentPolyline, polyline, diyLine, first, last, brtlist, readyAdd = [],
-addPoint = [], num = [], colorList = [], diyStation = false, enableEditing = false, enableAutoViewport = true;
+  addPoint = [], num = [], colorList = [], diyStation = false, enableEditing = false, enableAutoViewport = true;
 var stationIcon = new BMap.Icon("station_icon.png", new BMap.Size(12, 12));
-var getPolylineOptions = function getPolylineOptions() {
+var getPolylineOptions = function getPolylineOptions () {
   return {
     strokeColor: lineColor,
     strokeWeight: $("#strokeWeight").val(),
@@ -53,12 +53,12 @@ var getPolylineOptions = function getPolylineOptions() {
   }
 };
 var bus = new BMap.BusLineSearch(map, {
-  onGetBusListComplete: function onGetBusListComplete(result) {
+  onGetBusListComplete: function onGetBusListComplete (result) {
     let busListItem = $("#busListItem").val();
     let fstLine = result.getBusListItem(busListItem);
     bus.getBusLine(fstLine);
   },
-  onGetBusLineComplete: function onGetBusLineComplete(busline) {
+  onGetBusLineComplete: function onGetBusLineComplete (busline) {
     if (colorOption == "true") {
       randomColor();
       let color = `rgb(${num[0]},${num[1]},${num[2]})`;
@@ -85,7 +85,7 @@ var bus = new BMap.BusLineSearch(map, {
       if ($("#strokeStation").val() == "true") {
         map.addOverlay(marker);
         marker.setTitle(lineName + ":" + busStation.name);
-        marker.addEventListener("click", function(e) {
+        marker.addEventListener("click", function (e) {
           let opts = {
             width: 250,
             height: 80,
@@ -95,14 +95,14 @@ var bus = new BMap.BusLineSearch(map, {
           let infoWindow = new BMap.InfoWindow(content, opts);
           let point = new BMap.Point(e.target.getPosition().lng, e.target.getPosition().lat);
           map.openInfoWindow(infoWindow, point);
-        })
+        });
       }
     }
     if (enableAutoViewport) {
       let view = map.getViewport(eval(stationList));
-      map.centerAndZoom(view.center,view.zoom);
+      map.centerAndZoom(view.center, view.zoom);
     }
-    polyline.addEventListener("dblclick", function(e) {
+    polyline.addEventListener("dblclick", function (e) {
       let allOverlay = map.getOverlays();
       for (let i = 0, len = allOverlay.length; i < len; i++) {
         if (allOverlay[i].toString() == "[object Marker]") {
@@ -119,26 +119,26 @@ var bus = new BMap.BusLineSearch(map, {
       map.clearOverlays();
       readyAdd.pop(lineName);
     });
-    polyline.addEventListener("mouseover", function(e) {
+    polyline.addEventListener("mouseover", function (e) {
       if (e.target == currentPolyline) {
-        return false
+        return false;
       }
       currentPolyline = e.target;
       lineOpacity = currentPolyline.getStrokeOpacity();
       currentPolyline.setStrokeOpacity("1");
     });
-    polyline.addEventListener("mouseout", function(e) {
+    polyline.addEventListener("mouseout", function (e) {
       e.target.setStrokeOpacity(lineOpacity);
     })
   }
 });
-map.addEventListener("moveend", function() { 
-  var geocoder = new BMap.Geocoder();
-  geocoder.getLocation(map.getCenter(), function(e) {
+map.addEventListener("moveend", function () {
+  let geocoder = new BMap.Geocoder();
+  geocoder.getLocation(map.getCenter(), function (e) {
     city = e.addressComponents.city;
   })
 });
-function getCity(res) {
+function getCity (res) {
   if (res) {
     city = res.name;
     map.centerAndZoom(city, 13);
@@ -146,25 +146,25 @@ function getCity(res) {
     city = "温州市";
   }
 }
-function randomColor() {
+function randomColor () {
   let arr1 = ["0", "51", "102", "153", "204"];
   let arr2 = arr1.sort(() => {
     return Math.random() - 0.5;
-  })
+  });
   num = arr2.splice(0, 2).concat("255").sort(() => {
     return Math.random() - 0.5;
-  })
+  });
 }
-function addLine(line) {
+function addLine (line) {
   if ($.inArray(line, readyAdd) == -1) {
     bus.getBusList(line);
-    readyAdd.push(line); 
+    readyAdd.push(line);
     $("#editBtn").removeClass("disable");
   } else {
     alert("该路线已添加");
   }
 }
-function clear() {
+function clear () {
   for (let i = 0, len = map.getOverlays().length; i < len; i++) {
     map.getOverlays()[i].enableMassClear();
   }
@@ -176,7 +176,7 @@ function clear() {
   $("#editBtn").addClass("disable").text("启用路径编辑");
   $("#stopBtn").addClass("disable");
 }
-$("#container").click(function() {
+$("#container").click(function () {
   if (diyLine && !last) {
     addPoint = [];
     for (let i = 0, len = map.getOverlays().length; i < len; i++) {
@@ -184,33 +184,33 @@ $("#container").click(function() {
     }
   }
 });
-$("#busList").bind("input propertychange", function() {
+$("#busList").bind("input propertychange", function () {
   inputLine = $(this).val();
 });
-$("#busList").focus(function() {
+$("#busList").focus(function () {
   inputLine = $(this).val();
   $(this).val("");
 });
-$("#busList").blur(function() {
+$("#busList").blur(function () {
   $(this).val(inputLine);
 });
-$("#stationList").bind("input propertychange", function() {
+$("#stationList").bind("input propertychange", function () {
   inputStation = $(this).val();
 });
-$("#stationList").focus(function() {
+$("#stationList").focus(function () {
   inputStation = $(this).val();
   $(this).val("");
 });
-$("#stationList").blur(function() {
+$("#stationList").blur(function () {
   $(this).val(inputStation);
 });
-$("#addBtn").click(function() {
+$("#addBtn").click(function () {
   let line = $("#busList").val().replace("路", "");
   colorOption = "false";
   enableAutoViewport = true;
   addLine(line);
 });
-$("#searchBtn").click(function() {
+$("#searchBtn").click(function () {
   colorOption = $("#randomColor").val();
   enableAutoViewport = false;
   let local = new BMap.LocalSearch(map, {
@@ -219,17 +219,16 @@ $("#searchBtn").click(function() {
       map: map,
       autoViewport: false
     },
-    onSearchComplete: function() {
+    onSearchComplete: function () {
       clear();
-      local.setMarkersSetCallback(function(pois) {
+      local.setMarkersSetCallback(function (pois) {
         let marker = pois[0].marker;
         let point = new BMap.Point(pois[0].point.lng, pois[0].point.lat);
         map.panTo(point);
         marker.setAnimation(BMAP_ANIMATION_DROP);
       });
-      let address = local.getResults().getPoi(0).address;
-      let passBus = address.split(";");
-      for (let i = 0, len = passBus.length; i < len; i++) { 
+      let passBus = local.getResults().getPoi(0).address.split(";");
+      for (let i = 0, len = passBus.length; i < len; i++) {
         addLine(passBus[i]);
       }
     }
@@ -237,9 +236,9 @@ $("#searchBtn").click(function() {
   let station = $("#stationList").val() + '-公交站,';
   local.search(station, {
     forceLocal: "ture"
-  })
+  });
 });
-$("#brtBtn").click(function() {
+$("#brtBtn").click(function () {
   let brt = true;
   switch (city) {
     case "杭州市":
@@ -259,22 +258,22 @@ $("#brtBtn").click(function() {
       break;
     default:
       brt = false;
-      alert("该功能只支持浙江省内。如当前城市有BRT线路，请放大地图再试")
-    }
-    if (brt) {
-      clear();
-      colorOption = $("#randomColor").val();
-      enableAutoViewport = false;
-      for (let i = 0, len = brtlist.length; i < len; i++) {
-        if ($.inArray(brtlist[i], readyAdd) == -1) {
-          readyAdd.push(brtlist[i]);
-          bus.getBusList(brtlist[i]);
-        }
+      alert("该功能只支持浙江省内。如当前城市有BRT线路，请放大地图再试");
+  }
+  if (brt) {
+    clear();
+    colorOption = $("#randomColor").val();
+    enableAutoViewport = false;
+    for (let i = 0, len = brtlist.length; i < len; i++) {
+      if ($.inArray(brtlist[i], readyAdd) == -1) {
+        readyAdd.push(brtlist[i]);
+        bus.getBusList(brtlist[i]);
       }
-      $(this).attr("disabled", true).addClass("disable");
     }
+    $(this).attr("disabled", true).addClass("disable");
+  }
 });
-$("#editBtn").click(function() {
+$("#editBtn").click(function () {
   if (polyline) {
     if ($(this).hasClass("disable") == false) {
       polyline.enableEditing();
@@ -285,10 +284,19 @@ $("#editBtn").click(function() {
     }
   }
 });
-$("#clearBtn").click(function() {
+$("#clearBtn").click(function () {
   clear();
 });
-$("#drawLine").click(function() {
+$("#mapStyle").change(function () {
+  if ($(this).val() == 'default') {
+    window.location.reload();
+  } else {
+    map.setMapStyleV2({
+      styleId: $(this).val()
+    });
+  }
+});
+$("#drawLine").click(function () {
   $(this).addClass("disable").text("完成路径");
   $("#drawStation").removeClass("disable").text("添加标识");
   diyLine = true;
@@ -297,7 +305,7 @@ $("#drawLine").click(function() {
   last = false;
   lineColor = $("#strokeColor").val();
   map.setDefaultCursor("crosshair");
-  map.addEventListener("click", function(e) {
+  map.addEventListener("click", function (e) {
     if (diyLine) {
       let point = new BMap.Point(e.point.lng, e.point.lat);
       addPoint.push(point);
@@ -317,7 +325,7 @@ $("#drawLine").click(function() {
       }
     }
   });
-  map.addEventListener("dblclick", function(e) {
+  map.addEventListener("dblclick", function (e) {
     $("#drawLine").removeClass("disable").text("添加路径");
     $("#editBtn").removeClass("disable");
     map.setDefaultCursor("url(http://api0.map.bdimg.com/images/openhand.cur) 8 8, default");
@@ -343,16 +351,16 @@ $("#drawLine").click(function() {
       first = true;
       last = true;
     }
-  })
+  });
 });
-$("#drawStation").click(function() {
+$("#drawStation").click(function () {
   $("#drawLine").removeClass("disable").text("添加路径");
   diyLine = false;
   diyStation = !diyStation;
   if (diyStation) {
     $(this).addClass("disable").text("完成标识");
     map.setDefaultCursor("pointer");
-    map.addEventListener("click", function(e) {
+    map.addEventListener("click", function (e) {
       if (diyStation) {
         let point = new BMap.Point(e.point.lng, e.point.lat);
         let marker = new BMap.Marker(point, {
@@ -361,7 +369,7 @@ $("#drawStation").click(function() {
         marker.disableMassClear();
         marker.enableDragging();
         map.addOverlay(marker);
-        marker.addEventListener("dblclick", function(e) {
+        marker.addEventListener("dblclick", function (e) {
           e.target.enableMassClear();
           map.clearOverlays();
         });
@@ -372,8 +380,9 @@ $("#drawStation").click(function() {
     map.setDefaultCursor("url(http://api0.map.bdimg.com/images/openhand.cur) 8 8, default");
   }
 });
-$(".set").click(function() {
-  diyLine = diyStation = false;
+$(".set").click(function () {
+  diyLine = false;
+  diyStation = false;
   map.setDefaultCursor("default");
   if ($(this).next().is(":hidden")) {
     $(this).find(".icon").text("-");

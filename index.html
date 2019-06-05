@@ -3,19 +3,26 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-  <title>线路图</title>
+  <meta name="description" content="基于百度地图JavaScript API V3.0的公交线路绘制网站" />
+  <meta name="keywords" content="公交, 线路图, 百度地图API" />
+  <title>公交线路图绘制</title>
+  <link rel="shortcut icon" href="favicon.ico" />
   <link rel="stylesheet" href="map.css" type="text/css" />
-  <script type="text/javascript" src="https://api.map.baidu.com/getscript?v=2.0&ak=CrkK1Axboq7E3K93fOE0GHfjII2z8Lwf"></script>
+  <script type="text/javascript" src="https://api.map.baidu.com/getscript?v=3.0&ak=CrkK1Axboq7E3K93fOE0GHfjII2z8Lwf"></script>
 </head>
 <body>
-  <div id="map"></div>
+  <div id="map">
+    <p id="tip">推荐在PC端使用Chrome等浏览器访问，如因浏览器限制脚本运行而不能正确显示地图，请点击地址栏右侧的“加载脚本”</p>
+  </div>
   <ul id="container">
     <li class="set">新增线路<span class="icon">-</span></li>
     <div class="sub sub0">
       <div class="subContainer">
         <div class="opt">
           <p class="optTitle">线路名</p>
-          <input type="text" value="1" id="busList" onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" onpaste="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')">
+          <input type="text" value="1" id="busList"
+            onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')"
+            onpaste="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')">
         </div>
         <div class="opt">
           <p class="optTitle">上下行</p>
@@ -51,6 +58,11 @@
           </select>
         </div>
         <button id="addBtn">新增</button>
+        <img class="question" src="question.png" alt="提示" />
+        <div class="infoContainer">
+          <div class="info">可依据自定义样式同时绘制多条公交线路，双击路径可删除线路。</div>
+          <div class="triangle"></div>
+        </div>
       </div>
     </div>
     <li class="set">检索站点<span class="icon">+</span></li>
@@ -58,7 +70,9 @@
       <div class="subContainer">
         <div class="opt">
           <p class="optTitle">站名</p>
-          <input type="text" value="八字桥" id="stationList" onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" onpaste="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')">
+          <input type="text" value="八字桥" id="stationList"
+            onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')"
+            onpaste="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')">
         </div>
         <div class="opt">
           <p class="optTitle">颜色</p>
@@ -68,14 +82,33 @@
           </select>
         </div>
         <button id="searchBtn">搜索</button>
+        <img class="question" src="question.png" alt="提示" />
+        <div class="infoContainer">
+          <div class="info">由于API限制，站名必须与百度地图能检索得到的站点名称完全一致。</div>
+          <div class="triangle"></div>
+        </div>
       </div>
     </div>
     <li class="set">DIY模式<span class="icon">+</span></li>
     <div class="sub">
       <div class="subContainer">
+        <div class="opt">
+          <p class="optTitle">风格</p>
+          <select id="mapStyle">
+            <option value="default">默认</option>
+            <option value="08fe74bc19167c842ae1cfa621be30f7">简化</option>
+            <option value="ac3a07ff1a65b1f2bfa7965a86f82fe5">灰白</option>
+            <option value="0ef8b85d5e6b011d83da7829ac17a041">暗黑</option>
+          </select>
+        </div>
         <button id="drawLine">添加路径</button>
         <button id="drawStation">添加标识</button>
         <button id="editBtn" class="disable">启用路径编辑</button>
+        <img class="question" src="question.png" alt="提示" />
+        <div class="infoContainer">
+          <div class="info">添加路径时，单击地图连接轨迹，双击终止绘制，样式同"新增线路"下的配置。</div>
+          <div class="triangle"></div>
+        </div>
       </div>
     </div>
     <li class="set">快捷操作<span class="icon">+</span></li>
@@ -83,10 +116,15 @@
       <div class="subContainer">
         <button id="brtBtn">添加所有BRT线路</button>
         <button id="clearBtn">清除所有标识</button>
+        <img class="question" src="question.png" alt="提示" />
+        <div class="infoContainer">
+          <div class="info">"添加所有BRT线路"当前只支持浙江省内有BRT的城市。</div>
+          <div class="triangle"></div>
+        </div>
       </div>
     </div>
   </ul>
-  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-  <script src="map.js"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="map.js"></script>
 </body>
 </html>
