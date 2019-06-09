@@ -1,23 +1,23 @@
 "use strict";
-// window.onload = function () {
-//   document.onkeydown = function () {
-//     var e = window.event || arguments[0];
-//     if (e.keyCode == 123) {
-//       return false;
-//     } else {
-//       if (e.ctrlKey && e.shiftKey && e.keyCode == 73) {
-//         return false;
-//       } else {
-//         if (e.ctrlKey && e.keyCode == 85) {
-//           return false;
-//         }
-//       }
-//     }
-//   }
-//   document.oncontextmenu = function () {
-//     return false;
-//   }
-// };
+window.onload = function () {
+  document.onkeydown = function () {
+    var e = window.event || arguments[0];
+    if (e.keyCode == 123) {
+      return false;
+    } else {
+      if (e.ctrlKey && e.shiftKey && e.keyCode == 73) {
+        return false;
+      } else {
+        if (e.ctrlKey && e.keyCode == 85) {
+          return false;
+        }
+      }
+    }
+  }
+  document.oncontextmenu = function () {
+    return false;
+  }
+};
 var map = new BMap.Map("map", {
   enableMapClick: false
 });
@@ -57,6 +57,9 @@ var bus = new BMap.BusLineSearch(map, {
     let busListItem = $("#busListItem").val();
     let fstLine = result.getBusListItem(busListItem);
     bus.getBusLine(fstLine);
+    if (!result.Zz.length) {
+      alert("未检索到该线路名，请确认有此线路数据后再试");
+    }
   },
   onGetBusLineComplete: function onGetBusLineComplete (busline) {
     if (colorOption == "true") {
@@ -75,6 +78,7 @@ var bus = new BMap.BusLineSearch(map, {
     polyline = new BMap.Polyline(busline.getPath(), getPolylineOptions());
     let lineName = busline.name.substr(0, busline.name.indexOf("("));
     map.addOverlay(polyline);
+    readyAdd.push(lineName);
     let stationList = [];
     for (let i = 0, len = busline.getNumBusStations(); i < len; i++) {
       let busStation = busline.getBusStation(i);
@@ -117,7 +121,8 @@ var bus = new BMap.BusLineSearch(map, {
       }
       e.target.enableMassClear();
       map.clearOverlays();
-      readyAdd.pop(lineName);
+      let index = readyAdd.indexOf(lineName);
+      readyAdd.splice(index, 1);
     });
     polyline.addEventListener("mouseover", function (e) {
       if (e.target == currentPolyline) {
@@ -158,7 +163,6 @@ function randomColor () {
 function addLine (line) {
   if ($.inArray(line, readyAdd) == -1) {
     bus.getBusList(line);
-    readyAdd.push(line);
     $("#editBtn").removeClass("disable");
   } else {
     alert("该路线已添加");
@@ -220,17 +224,21 @@ $("#searchBtn").click(function () {
       autoViewport: false
     },
     onSearchComplete: function () {
-      clear();
       local.setMarkersSetCallback(function (pois) {
-        let marker = pois[0].marker;
-        let point = new BMap.Point(pois[0].point.lng, pois[0].point.lat);
-        map.panTo(point);
-        marker.setAnimation(BMAP_ANIMATION_DROP);
+        if (pois[0].type == "1") {
+          clear();
+          let marker = pois[0].marker;
+          let point = new BMap.Point(pois[0].point.lng, pois[0].point.lat);
+          map.panTo(point);
+          marker.setAnimation(BMAP_ANIMATION_DROP);
+          let passBus = local.getResults().getPoi(0).address.split(";");
+          for (let i = 0, len = passBus.length; i < len; i++) {
+            addLine(passBus[i]);
+          }
+        } else {
+          alert("未检索到该站名，请确认有此站点数据后再试");
+        }
       });
-      let passBus = local.getResults().getPoi(0).address.split(";");
-      for (let i = 0, len = passBus.length; i < len; i++) {
-        addLine(passBus[i]);
-      }
     }
   });
   let station = $("#stationList").val() + '-公交站,';
@@ -258,7 +266,7 @@ $("#brtBtn").click(function () {
       break;
     default:
       brt = false;
-      alert("该功能只支持浙江省内。如当前城市有BRT线路，请放大地图再试");
+      alert("该功能只支持浙江省城市。如当前城市有BRT线路，请放大地图再试");
   }
   if (brt) {
     clear();
@@ -266,7 +274,6 @@ $("#brtBtn").click(function () {
     enableAutoViewport = false;
     for (let i = 0, len = brtlist.length; i < len; i++) {
       if ($.inArray(brtlist[i], readyAdd) == -1) {
-        readyAdd.push(brtlist[i]);
         bus.getBusList(brtlist[i]);
       }
     }

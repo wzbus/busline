@@ -7,7 +7,160 @@
   <meta name="keywords" content="公交, 线路图, 百度地图API" />
   <title>公交线路图绘制</title>
   <link rel="shortcut icon" href="favicon.ico" />
-  <link rel="stylesheet" href="map.css" type="text/css" />
+  <style>
+    * {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: "Microsoft YaHei";
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    outline: 0;
+  }
+  html,body,#map {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  #tip {
+    opacity: 0;
+    animation: show 1s 5s;
+    -webkit-animation: show 1s 5s;
+    animation-fill-mode: forwards;
+  }
+  #container {
+    position: absolute;
+    width: 182px;
+    top: 20px;
+    right: 30px;
+    border: 1px solid #5298ff;
+  }
+  .set {
+    padding: 5px 10px;
+    color: #fff;
+    background: #4b4a5e;
+    opacity: 0.8;
+  }
+  .sub {
+    display: none;
+    padding: 0 10px;
+    background: #f5f3f0;
+  }
+  .sub0 {
+    display: block;
+  }
+  .subContainer {
+    position: relative;
+    padding-bottom: 10px;
+  }
+  .opt {
+    position: relative;
+    padding-top: 10px;
+  }
+  .optTitle {
+    width: 60px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 14px;
+    text-align: center;
+    background: #c5464a;
+    color: #fff;
+    border-radius: 5px 0 0 5px;
+  }
+  .opt input,.opt select {
+    position: absolute;
+    width: 100px;
+    height: 28px;
+    left: 60px;
+    top: 10px;
+    width: 100px;
+    padding: 0 5px;
+    border: 2px solid #c5464a;
+    border-radius: 0 5px 5px 0;
+    background: transparent;
+    text-align: right;
+  }
+  .opt input[type="number"] {
+    direction: rtl;
+  }
+  select {
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    direction: rtl;
+  }
+  button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    color: #fff;
+    background: #5298ff;
+    border: 0;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .sub0 button {
+    margin-right: 8px;
+  }
+  .icon {
+    float: right;
+  }
+  .disable {
+    background: #999;
+  }
+  .question {
+    position: absolute;
+    right: 0;
+    bottom: 15px;
+    width: 14px;
+    height: 14px;
+    cursor: help;
+  }
+  .question:hover + .infoContainer {
+    animation: show 1s;
+    -webkit-animation: show 1s;
+    animation-fill-mode: forwards;
+  }
+  .infoContainer {
+    position: absolute;
+    right: 10px;
+    bottom: 22px;
+    width: 180px;
+    transform: translateY(50%);
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .info {
+    width: 160px;
+    padding: 5px 5px 5px 10px;
+    font-size: 16px;
+    word-wrap: break-word;
+    color: #333;
+    background-color: #B3D8FF;
+    border-radius: 5px;
+  }
+  .triangle {
+    position: absolute;
+    margin-top: -10px;
+    top: 50%;
+    right: 0;
+    width: 0;
+    height: 0;
+    border: 10px solid;
+    border-color: transparent transparent transparent #B3D8FF;
+  }
+  @keyframes show {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+  @media screen and (max-width:768px) {
+    #container {
+      top: 10px;
+      right: 10px;
+    }
+  }
+  </style>
   <script type="text/javascript" src="https://api.map.baidu.com/getscript?v=3.0&ak=CrkK1Axboq7E3K93fOE0GHfjII2z8Lwf"></script>
 </head>
 <body>
@@ -124,7 +277,7 @@
       </div>
     </div>
   </ul>
-  <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
   <script type="text/javascript" src="map.js"></script>
 </body>
 </html>
