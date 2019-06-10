@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
   <meta name="description" content="基于百度地图JavaScript API V3.0的公交线路绘制网站" />
-  <meta name="keywords" content="公交, 线路图, 百度地图API" />
+  <meta name="keywords" content="公交, 线路图, 百度地图API, 绘制线路" />
   <title>公交线路图绘制</title>
   <link rel="shortcut icon" href="favicon.ico" />
   <style>
@@ -24,10 +24,28 @@
     overflow: hidden;
   }
   #tip {
+    margin: 20px;
+    max-width: calc(100% - 250px);
+    color: #666;
+    text-indent: 2em;
     opacity: 0;
     animation: show 1s 5s;
     -webkit-animation: show 1s 5s;
     animation-fill-mode: forwards;
+  }
+  #domain {
+    position: absolute;
+    margin: auto;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    height: 100px;
+    color: #ECECEC;
+    text-align: center;
+    font-size: 60px;
+    font-weight: bold;
+    letter-spacing: 5px;
   }
   #container {
     position: absolute;
@@ -35,6 +53,10 @@
     top: 20px;
     right: 30px;
     border: 1px solid #5298ff;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
   }
   .set {
     padding: 5px 10px;
@@ -46,9 +68,6 @@
     display: none;
     padding: 0 10px;
     background: #f5f3f0;
-  }
-  .sub0 {
-    display: block;
   }
   .subContainer {
     position: relative;
@@ -99,9 +118,6 @@
     border-radius: 5px;
     cursor: pointer;
   }
-  .sub0 button {
-    margin-right: 8px;
-  }
   .icon {
     float: right;
   }
@@ -150,6 +166,80 @@
     border: 10px solid;
     border-color: transparent transparent transparent #B3D8FF;
   }
+  #lineInfo {
+    position: absolute;
+    width: 350px;
+    height: 130px;
+    top: 46px;
+    left: 10px;
+    background-color: #fff;
+    border: 1px solid #3385ff;
+    display: none;
+  }
+  .infoLeft {
+    width: 100px;
+    height: 100%;
+    background-color: #3385ff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .nameInput {
+    width: 65px;
+    line-height: 20px;
+    margin: 0 auto;
+    font-size: 14px;
+    text-align: center;
+    color: #fff;
+    background-color: #0c6eff;
+    border: none;
+    border-radius: 5px;
+  }
+  .infoRight {
+    height: 100%;
+    flex: 1;
+  }
+  .rightContainer {
+    padding: 0 12px;
+    color: #3385ff;
+  }
+  .lineStation {
+    margin-top: 30px;
+    display: flex;
+  }
+  .stationInput {
+    width: 45%;
+	  color:#3385ff;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    border: none;
+  }
+  .stationLink {
+    width: 10%;
+    color:#3385ff;
+    text-align: center;
+  }
+  .lineTime {
+    margin-top: 5px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .timeInput {
+    width: 45%;
+	  color:#3385ff;
+    font-size: 12px;
+    text-align: center;
+    border: none;
+  }
+  .remarkInput {
+    width: 100%;
+    margin-top: 15px;
+    color:#333;
+    font-size: 12px;
+    text-align: center;
+    border: none;
+  }
   @keyframes show {
     from {opacity: 0;}
     to {opacity: 1;}
@@ -166,10 +256,11 @@
 <body>
   <div id="map">
     <p id="tip">推荐在PC端使用Chrome等浏览器访问，如因浏览器限制脚本运行而不能正确显示地图，请点击地址栏右侧的“加载脚本”</p>
+    <p id="domain">wzbus.xyz</p>
   </div>
   <ul id="container">
     <li class="set">新增线路<span class="icon">-</span></li>
-    <div class="sub sub0">
+    <div class="sub">
       <div class="subContainer">
         <div class="opt">
           <p class="optTitle">线路名</p>
@@ -256,6 +347,7 @@
         </div>
         <button id="drawLine">添加路径</button>
         <button id="drawStation">添加标识</button>
+        <button id="drawInfo">添加线路信息</button>
         <button id="editBtn" class="disable">启用路径编辑</button>
         <img class="question" src="question.png" alt="提示" />
         <div class="infoContainer">
@@ -277,6 +369,26 @@
       </div>
     </div>
   </ul>
+  <div id="lineInfo">
+    <div class="infoLeft">
+      <input type="text" class="nameInput" value="0路">
+    </div>
+    <div class="infoRight">
+      <div class="rightContainer">
+        <div class="lineStation">
+          <input type="text" class="stationInput" value="起点站">
+          <span class="stationLink">——</span>
+          <input type="text" class="stationInput" value="终点站">
+        </div>
+        <div class="lineTime">
+          <input type="text" class="timeInput" value="6:00-20:00">
+          <input type="text" class="timeInput" value="6:00-20:00">
+        </div>
+        <input type="text" class="remarkInput" value="无人售票：2元　班次间隔：15分钟">
+        <div class="lineRemark"></div>
+      </div>
+    </div>
+  </div>
   <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
   <script type="text/javascript" src="map.js"></script>
 </body>

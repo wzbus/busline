@@ -1,19 +1,5 @@
 "use strict";
 window.onload = function () {
-  document.onkeydown = function () {
-    var e = window.event || arguments[0];
-    if (e.keyCode == 123) {
-      return false;
-    } else {
-      if (e.ctrlKey && e.shiftKey && e.keyCode == 73) {
-        return false;
-      } else {
-        if (e.ctrlKey && e.keyCode == 85) {
-          return false;
-        }
-      }
-    }
-  }
   document.oncontextmenu = function () {
     return false;
   }
@@ -179,6 +165,8 @@ function clear () {
   $("#brtBtn").attr("disabled", false).removeClass("disable");
   $("#editBtn").addClass("disable").text("启用路径编辑");
   $("#stopBtn").addClass("disable");
+  $("#drawInfo").removeClass("disable");
+  $("#lineInfo").hide();
 }
 $("#container").click(function () {
   if (diyLine && !last) {
@@ -386,6 +374,28 @@ $("#drawStation").click(function () {
     $(this).removeClass("disable").text("添加标识");
     map.setDefaultCursor("url(http://api0.map.bdimg.com/images/openhand.cur) 8 8, default");
   }
+});
+function mousedown(event) {
+  let offsetX = $("#lineInfo").offset().left;
+  let offsetY = $("#lineInfo").offset().top;
+  let x = event.clientX - offsetX;
+  let y = event.clientY - offsetY;
+  document.onmousemove = function (event) {
+    $("#lineInfo").css({
+      "left": event.clientX - x + "px",
+      "top": event.clientY - y + "px",
+      "cursor": "move"
+    });
+  }
+  document.onmouseup = function () {
+    document.onmousemove = null;
+    document.onmouseup = null;
+    $("#lineInfo").css("cursor", "default");
+  }
+}
+$("#drawInfo").click(function () {
+  $("#lineInfo").css("display", "flex").bind("mousedown", mousedown);
+  $(this).addClass("disable");
 });
 $(".set").click(function () {
   diyLine = false;
