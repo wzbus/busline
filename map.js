@@ -4,10 +4,12 @@ window.onload = function () {
     return false;
   }
 };
+var city, inputLine, inputStation, lineOpacity, lineColor, colorOption, currentPolyline, polyline, brtlist,
+  readyAdd = [], addPoint = [], num = [], colorList = [], enableAutoViewport = true;
 var map = new BMap.Map("map", {
   enableMapClick: false
 });
-var city;
+var traffic = new BMap.TrafficLayer();
 var myCity = new BMap.LocalCity();
 myCity.get(getCity);
 map.enableScrollWheelZoom();
@@ -26,16 +28,13 @@ cr.addCopyright({
   id: 1,
   content: "&copy;温州公交吧 | 中华全知道"
 });
-var inputLine, inputStation, lineOpacity, lineColor, colorOption, currentPolyline, polyline, diyLine, first, last, brtlist, readyAdd = [],
-  addPoint = [], num = [], colorList = [], diyStation = false, enableEditing = false, enableAutoViewport = true;
 var stationIcon = new BMap.Icon("station_icon.png", new BMap.Size(12, 12));
 var getPolylineOptions = function getPolylineOptions () {
   return {
     strokeColor: lineColor,
     strokeWeight: $("#strokeWeight").val(),
     strokeOpacity: $("#strokeOpacity").val(),
-    strokeStyle: $("#strokeStyle").val(),
-    enableEditing: enableEditing
+    strokeStyle: $("#strokeStyle").val()
   }
 };
 var bus = new BMap.BusLineSearch(map, {
@@ -44,7 +43,7 @@ var bus = new BMap.BusLineSearch(map, {
     let fstLine = result.getBusListItem(busListItem);
     bus.getBusLine(fstLine);
     if (!result.Zz.length) {
-      alert("未检索到该线路名，请确认有此线路数据后再试");
+      alert("未检索到\"" + result.keyword + "\"，请确认有此线路数据后再试");
     }
   },
   onGetBusLineComplete: function onGetBusLineComplete (busline) {
@@ -64,7 +63,7 @@ var bus = new BMap.BusLineSearch(map, {
     polyline = new BMap.Polyline(busline.getPath(), getPolylineOptions());
     let lineName = busline.name.substr(0, busline.name.indexOf("("));
     map.addOverlay(polyline);
-    readyAdd.push(lineName);
+    readyAdd.push(lineName.substring(0, lineName.length - 1));
     let stationList = [];
     for (let i = 0, len = busline.getNumBusStations(); i < len; i++) {
       let busStation = busline.getBusStation(i);
@@ -149,9 +148,8 @@ function randomColor () {
 function addLine (line) {
   if ($.inArray(line, readyAdd) == -1) {
     bus.getBusList(line);
-    $("#editBtn").removeClass("disable");
   } else {
-    alert("该路线已添加");
+    alert(line + "路已添加");
   }
 }
 function clear () {
@@ -162,20 +160,9 @@ function clear () {
   readyAdd = [];
   addPoint = [];
   colorList = [];
+  $(".remark").hide();
   $("#brtBtn").attr("disabled", false).removeClass("disable");
-  $("#editBtn").addClass("disable").text("启用路径编辑");
-  $("#stopBtn").addClass("disable");
-  $("#drawInfo").removeClass("disable");
-  $("#lineInfo").hide();
 }
-$("#container").click(function () {
-  if (diyLine && !last) {
-    addPoint = [];
-    for (let i = 0, len = map.getOverlays().length; i < len; i++) {
-      map.clearOverlays();
-    }
-  }
-});
 $("#busList").bind("input propertychange", function () {
   inputLine = $(this).val();
 });
@@ -220,11 +207,13 @@ $("#searchBtn").click(function () {
           map.panTo(point);
           marker.setAnimation(BMAP_ANIMATION_DROP);
           let passBus = local.getResults().getPoi(0).address.split(";");
+          $(".remark").show();
+          $("#amount").text(passBus.length);
           for (let i = 0, len = passBus.length; i < len; i++) {
             addLine(passBus[i]);
           }
         } else {
-          alert("未检索到该站名，请确认有此站点数据后再试");
+          alert("未检索到\"" + $("#stationList").val() + "\"，请确认有此站点数据后再试");
         }
       });
     }
@@ -234,11 +223,22 @@ $("#searchBtn").click(function () {
     forceLocal: "ture"
   });
 });
+$("#layerBtn").click(function () {
+  if ($(this).hasClass("disable")) {
+    map.removeTileLayer(traffic); 
+    $(this).removeClass("disable").text("显示实时路况");
+  } else if ($("#mapStyle").val() == "c10f815814efe92503249e060e268f4c") {
+    map.addTileLayer(traffic);
+    $(this).addClass("disable").text("关闭实时路况");
+  } else {
+    alert("该模式下不支持实时路况，请选择默认底图");
+  }
+});
 $("#brtBtn").click(function () {
   let brt = true;
   switch (city) {
     case "杭州市":
-      brtlist = ["B1", "B1C", "B1D", "B2", "B2区间", "B2C", "B4", "B4C", "B7", "B8", "B8B", "B支1", "B支1区间", "B支1快线", "B支2", "B支2C", "B支3", "B支3C", "B支4", "B支4快线", "B支7", "B支7C", "B支7D", "B支8"];
+      brtlist = ["B1", "B1C", "B1D", "B2", "B2C", "B4", "B4C", "B7", "B8", "B8B", "B支1", "B支1区间", "B支1快线", "B支2", "B支2C", "B支3", "B支3C", "B支4", "B支4快线", "B支7", "B支7C", "B支7D", "B支8"];
       break;
     case "温州市":
       brtlist = ["B1", "B2", "B3", "B4", "B101", "B102", "B103", "B104", "B105", "B106", "B107", "B108", "B109", "B111", "B112", "B113"];
@@ -268,138 +268,16 @@ $("#brtBtn").click(function () {
     $(this).attr("disabled", true).addClass("disable");
   }
 });
-$("#editBtn").click(function () {
-  if (polyline) {
-    if ($(this).hasClass("disable") == false) {
-      polyline.enableEditing();
-      $(this).addClass("disable").text("停用路径编辑");
-    } else {
-      polyline.disableEditing();
-      $(this).removeClass("disable").text("启用路径编辑");
-    }
-  }
-});
 $("#clearBtn").click(function () {
   clear();
 });
 $("#mapStyle").change(function () {
-  if ($(this).val() == 'default') {
-    window.location.reload();
-  } else {
-    map.setMapStyleV2({
-      styleId: $(this).val()
-    });
-  }
-});
-$("#drawLine").click(function () {
-  $(this).addClass("disable").text("完成路径");
-  $("#drawStation").removeClass("disable").text("添加标识");
-  diyLine = true;
-  first = true;
-  diyStation = false;
-  last = false;
-  lineColor = $("#strokeColor").val();
-  map.setDefaultCursor("crosshair");
-  map.addEventListener("click", function (e) {
-    if (diyLine) {
-      let point = new BMap.Point(e.point.lng, e.point.lat);
-      addPoint.push(point);
-      let polyline = new BMap.Polyline(addPoint, getPolylineOptions());
-      map.addOverlay(polyline);
-      if (first) {
-        let point = new BMap.Point(e.point.lng, e.point.lat);
-        let marker = new BMap.Marker(point, {
-          icon: stationIcon
-        });
-        map.addOverlay(marker);
-        let label = new BMap.Label("起点", {
-          offset: new BMap.Size(15, -5)
-        });
-        marker.setLabel(label);
-        first = false;
-      }
-    }
+  map.setMapStyleV2({
+    styleId: $(this).val()
   });
-  map.addEventListener("dblclick", function (e) {
-    $("#drawLine").removeClass("disable").text("添加路径");
-    $("#editBtn").removeClass("disable");
-    map.setDefaultCursor("url(http://api0.map.bdimg.com/images/openhand.cur) 8 8, default");
-    if (!first) {
-      let point = new BMap.Point(e.point.lng, e.point.lat);
-      let marker = new BMap.Marker(point, {
-        icon: stationIcon
-      });
-      map.addOverlay(marker);
-      let label = new BMap.Label("终点", {
-        offset: new BMap.Size(15, -5)
-      });
-      marker.setLabel(label);
-      for (let i = 0, len = map.getOverlays().length; i < len; i++) {
-        map.clearOverlays();
-      }
-      polyline = new BMap.Polyline(addPoint, getPolylineOptions());
-      polyline.disableMassClear();
-      map.addOverlay(polyline);
-      readyAdd = [];
-      addPoint = [];
-      diyLine = false;
-      first = true;
-      last = true;
-    }
-  });
-});
-$("#drawStation").click(function () {
-  $("#drawLine").removeClass("disable").text("添加路径");
-  diyLine = false;
-  diyStation = !diyStation;
-  if (diyStation) {
-    $(this).addClass("disable").text("完成标识");
-    map.setDefaultCursor("pointer");
-    map.addEventListener("click", function (e) {
-      if (diyStation) {
-        let point = new BMap.Point(e.point.lng, e.point.lat);
-        let marker = new BMap.Marker(point, {
-          icon: stationIcon
-        });
-        marker.disableMassClear();
-        marker.enableDragging();
-        map.addOverlay(marker);
-        marker.addEventListener("dblclick", function (e) {
-          e.target.enableMassClear();
-          map.clearOverlays();
-        });
-      }
-    });
-  } else {
-    $(this).removeClass("disable").text("添加标识");
-    map.setDefaultCursor("url(http://api0.map.bdimg.com/images/openhand.cur) 8 8, default");
-  }
-});
-function mousedown(event) {
-  let offsetX = $("#lineInfo").offset().left;
-  let offsetY = $("#lineInfo").offset().top;
-  let x = event.clientX - offsetX;
-  let y = event.clientY - offsetY;
-  document.onmousemove = function (event) {
-    $("#lineInfo").css({
-      "left": event.clientX - x + "px",
-      "top": event.clientY - y + "px",
-      "cursor": "move"
-    });
-  }
-  document.onmouseup = function () {
-    document.onmousemove = null;
-    document.onmouseup = null;
-    $("#lineInfo").css("cursor", "default");
-  }
-}
-$("#drawInfo").click(function () {
-  $("#lineInfo").css("display", "flex").bind("mousedown", mousedown);
-  $(this).addClass("disable");
+  $("#layerBtn").removeClass("disable").text("显示实时路况");
 });
 $(".set").click(function () {
-  diyLine = false;
-  diyStation = false;
   map.setDefaultCursor("default");
   if ($(this).next().is(":hidden")) {
     $(this).find(".icon").text("-");
