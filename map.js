@@ -124,6 +124,12 @@ jQuery.noConflict();
       })
     }
   });
+  map.addEventListener("zoomend", function () {
+    let geocoder = new BMap.Geocoder();
+    geocoder.getLocation(map.getCenter(), function (e) {
+      city = e.addressComponents.city;
+    })
+  });
   map.addEventListener("moveend", function () {
     let geocoder = new BMap.Geocoder();
     geocoder.getLocation(map.getCenter(), function (e) {
@@ -236,26 +242,46 @@ jQuery.noConflict();
     }
   });
   $("#subBtn").click(function () {
-    $.getScript("https://api.map.baidu.com/api?type=subway&v=1.0&ak=CrkK1Axboq7E3K93fOE0GHfjII2z8Lwf&s=1")
-      .done(function () {
-        let list = BMapSub.SubwayCitiesList;
-        let subwaycity;
-        let cityname = city.replace("市", "");
-        for (let i = 0, len = list.length; i < len; i++) {
-          if (list[i].name == cityname) {
-            subwaycity = list[i];
-            break;
+    if (["贵阳市", "乌鲁木齐市", "温州市", "济南市"].indexOf(city) != -1) {
+      alert("当前贵阳、乌鲁木齐、温州、济南无数据");
+    } else {
+      $.getScript("https://api.map.baidu.com/api?type=subway&v=1.0&ak=CrkK1Axboq7E3K93fOE0GHfjII2z8Lwf&s=1")
+        .done(function () {
+          let list = BMapSub.SubwayCitiesList;
+          let subwaycity;
+          let cityname = city.replace("市", "");
+          for (let i = 0, len = list.length; i < len; i++) {
+            if (list[i].name == cityname) {
+              subwaycity = list[i];
+              break;
+            }
           }
-        }
-        if (subwaycity) {
-          $("#subway").show();
-          let subway = new BMapSub.Subway("subway", subwaycity.citycode);
-          subway.setZoom(0.5);
-        }
-      })
-      .fail(function () {
-        alert("加载脚本失败，请检查网络后再试");
-      });
+          if (subwaycity) {
+            $("#subway").show();
+            $("#close").show();
+            let subway = new BMapSub.Subway("subway", subwaycity.citycode);
+            subway.setZoom(0.5);
+            let zoomControl = new BMapSub.ZoomControl({
+              anchor: BMAPSUB_ANCHOR_BOTTOM_RIGHT,
+              offset: new BMapSub.Size(10,100)
+            });
+            subway.addControl(zoomControl);
+            subway.addEventListener('tap', function(e) {
+              let detail = new BMapSub.DetailInfo(subway);
+              detail.search(e.station.name);
+            });
+          } else {
+            alert("当前城市无地铁");
+          }
+        })
+        .fail(function () {
+          alert("加载脚本失败，请检查网络后再试");
+        });
+    }
+  });
+  $("#close").click(function () {
+    $("#subway").hide();
+    $(this).hide();
   });
   $("#brtBtn").click(function () {
     $.getJSON("brt.json", function (res) {

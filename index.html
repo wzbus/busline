@@ -23,13 +23,6 @@
     height: 100%;
     overflow: hidden;
   }
-  #subway {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 9;
-    display: none;
-  }
   #tip {
     margin: 20px;
     max-width: calc(100% - 250px);
@@ -119,7 +112,7 @@
     -webkit-appearance: none;
     direction: rtl;
   }
-  button {
+  .btn {
     margin-top: 10px;
     padding: 5px 10px;
     color: #fff;
@@ -128,7 +121,7 @@
     border-radius: 5px;
     cursor: pointer;
   }
-  button:active {
+  .btn:active {
     background: #3385ff;
   }
   .icon {
@@ -189,6 +182,34 @@
     margin: 0 2px;
     color: #5298ff;
   }
+  #subway {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9;
+    display: none;
+  }
+  .lastTime {
+    width: auto !important;
+  }
+  #close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 42px;
+    line-height: 42px;
+    border: 0;
+    border-bottom: solid 1px #ccc;
+    border-radius: 3px;
+    box-shadow: rgba(0, 0, 0, 0.2) 1px 1px 2px;
+    background: rgba(255, 255, 255, 0.8);
+    font-size: 24px;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 10;
+    display: none;
+  }
   @keyframes show {
     from {opacity: 0;}
     to {opacity: 1;}
@@ -207,7 +228,6 @@
     <p id="tip">推荐在PC端使用Chrome等浏览器访问，如因浏览器限制脚本运行而不能正确显示地图，请点击地址栏右侧的“加载脚本”</p>
     <p id="domain">wzbus.xyz</p>
   </div>
-  <div id="subway"></div>
   <ul id="container">
     <li class="set">绘制线路<span class="icon">-</span></li>
     <div class="sub">
@@ -260,7 +280,7 @@
             <option value="0ef8b85d5e6b011d83da7829ac17a041">暗黑</option>
           </select>
         </div>
-        <button id="addBtn">添加</button>
+        <button id="addBtn" class="btn">添加</button>
         <img class="question" src="pic/question.png" alt="提示" />
         <div class="infoContainer">
           <div class="info">可依据自定义样式同时绘制多条公交线路，双击路径可删除线路。</div>
@@ -284,7 +304,7 @@
             <option value="true">随机</option>
           </select>
         </div>
-        <button id="searchBtn">搜索</button>
+        <button id="searchBtn" class="btn">搜索</button>
         <span class="remark">共<b id="amount"></b>条线路</span>
         <img class="question" src="pic/question.png" alt="提示" />
         <div class="infoContainer">
@@ -296,10 +316,10 @@
     <li class="set">快捷操作<span class="icon">+</span></li>
     <div class="sub">
       <div class="subContainer">
-        <button id="layerBtn">显示实时路况</button>
-        <button id="subBtn">显示地铁线路图</button>
-        <button id="brtBtn">添加所有BRT线路</button>
-        <button id="clearBtn">清除所有标识</button>
+        <button id="layerBtn" class="btn">显示实时路况</button>
+        <button id="subBtn" class="btn">显示地铁线路图</button>
+        <button id="brtBtn" class="btn">添加所有BRT线路</button>
+        <button id="clearBtn" class="btn">清除所有标识</button>
         <img class="question" src="pic/question.png" alt="提示" />
         <div class="infoContainer">
           <div class="info">"添加所有BRT线路"当前只支持浙江省内有BRT的城市。</div>
@@ -308,6 +328,8 @@
       </div>
     </div>
   </ul>
+  <div id="subway"></div>
+  <button id="close">×</button>
   <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
   <script type="text/javascript" src="map.js"></script>
 </body>
