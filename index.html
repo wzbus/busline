@@ -6,9 +6,9 @@
   <meta name="description" content="基于百度地图JavaScript API V3.0的公交线路绘制网站" />
   <meta name="keywords" content="公交, 线路图, 百度地图API, 绘制线路" />
   <title>公交线路图</title>
-  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="shortcut icon" href="pic/favicon.ico" />
   <style>
-    * {
+  * {
     margin: 0;
     padding: 0;
     list-style: none;
@@ -18,10 +18,17 @@
     box-sizing: border-box;
     outline: 0;
   }
-  html,body,#map {
+  html,body,#map,#subway {
     width: 100%;
     height: 100%;
     overflow: hidden;
+  }
+  #subway {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9;
+    display: none;
   }
   #tip {
     margin: 20px;
@@ -36,10 +43,10 @@
   #domain {
     position: absolute;
     margin: auto;
-    left: 0;
     top: 0;
-    right: 0;
     bottom: 0;
+    left: 0;
+    right: 0;
     height: 100px;
     color: #ECECEC;
     text-align: center;
@@ -193,13 +200,14 @@
     }
   }
   </style>
-  <script type="text/javascript" src="https://api.map.baidu.com/getscript?v=3.0&ak=CrkK1Axboq7E3K93fOE0GHfjII2z8Lwf"></script>
+  <script type="text/javascript" src="https://api.map.baidu.com/getscript?v=3.0&ak=CrkK1Axboq7E3K93fOE0GHfjII2z8Lwf&s=1"></script>
 </head>
 <body>
   <div id="map">
     <p id="tip">推荐在PC端使用Chrome等浏览器访问，如因浏览器限制脚本运行而不能正确显示地图，请点击地址栏右侧的“加载脚本”</p>
     <p id="domain">wzbus.xyz</p>
   </div>
+  <div id="subway"></div>
   <ul id="container">
     <li class="set">绘制线路<span class="icon">-</span></li>
     <div class="sub">
@@ -252,8 +260,8 @@
             <option value="0ef8b85d5e6b011d83da7829ac17a041">暗黑</option>
           </select>
         </div>
-        <button id="addBtn">新增</button>
-        <img class="question" src="question.png" alt="提示" />
+        <button id="addBtn">添加</button>
+        <img class="question" src="pic/question.png" alt="提示" />
         <div class="infoContainer">
           <div class="info">可依据自定义样式同时绘制多条公交线路，双击路径可删除线路。</div>
           <div class="triangle"></div>
@@ -278,7 +286,7 @@
         </div>
         <button id="searchBtn">搜索</button>
         <span class="remark">共<b id="amount"></b>条线路</span>
-        <img class="question" src="question.png" alt="提示" />
+        <img class="question" src="pic/question.png" alt="提示" />
         <div class="infoContainer">
           <div class="info">由于API限制，站名必须与百度地图能检索得到的站点名称完全一致。</div>
           <div class="triangle"></div>
@@ -289,9 +297,10 @@
     <div class="sub">
       <div class="subContainer">
         <button id="layerBtn">显示实时路况</button>
+        <button id="subBtn">显示地铁线路图</button>
         <button id="brtBtn">添加所有BRT线路</button>
         <button id="clearBtn">清除所有标识</button>
-        <img class="question" src="question.png" alt="提示" />
+        <img class="question" src="pic/question.png" alt="提示" />
         <div class="infoContainer">
           <div class="info">"添加所有BRT线路"当前只支持浙江省内有BRT的城市。</div>
           <div class="triangle"></div>
