@@ -5,7 +5,7 @@ window.onload = function () {
   }
 };
 var subway, city, inputLine, inputStation, lineOpacity, lineColor, colorOption, currentPolyline, polyline, brtlist,
-  readyAdd = [], num = [], colorList = [], enableAutoViewport = true;
+  readyAdd = [], num = [], colorList = [], enableAutoViewport;
 $("#search").click(function () {
   let start = $("#start").val();
   let end = $("#end").val();
@@ -29,7 +29,11 @@ jQuery.noConflict();
   map.enableInertialDragging();
   map.disableDoubleClickZoom();
   map.addControl(new BMap.CityListControl({
-    anchor: BMAP_ANCHOR_TOP_LEFT
+    anchor: BMAP_ANCHOR_TOP_LEFT,
+    offset: new BMap.Size(10, 10),
+    onChangeSuccess: function(e) {
+      city = e.city;
+    }
   }));
   var cr = new BMap.CopyrightControl({
     anchor: BMAP_ANCHOR_BOTTOM_RIGHT,
@@ -88,8 +92,6 @@ jQuery.noConflict();
           marker.setTitle(lineName + ":" + busStation.name);
           marker.addEventListener("click", function (e) {
             let opts = {
-              width: 250,
-              height: 80,
               title: e.target.getTitle().substr(e.target.getTitle().indexOf(":") + 1)
             };
             let content = busline.name;
@@ -131,7 +133,7 @@ jQuery.noConflict();
       });
       polyline.addEventListener("mouseout", function (e) {
         e.target.setStrokeOpacity(lineOpacity);
-      })
+      });
     }
   });
   map.addEventListener("zoomend", function () {
@@ -219,10 +221,11 @@ jQuery.noConflict();
         local.setMarkersSetCallback(function (pois) {
           if (pois[0].type == "1") {
             clear();
-            let marker = pois[0].marker;
             let point = new BMap.Point(pois[0].point.lng, pois[0].point.lat);
             map.panTo(point);
+            let marker = new BMap.Marker(point);
             marker.setAnimation(BMAP_ANIMATION_DROP);
+            map.addOverlay(marker);
             let passBus = local.getResults().getPoi(0).address.split(";");
             $(".remark").show();
             $("#amount").text(passBus.length);
@@ -252,8 +255,8 @@ jQuery.noConflict();
     }
   });
   $("#subBtn").click(function () {
-    if (["贵阳市", "乌鲁木齐市", "温州市", "济南市"].indexOf(city) != -1) {
-      alert("当前贵阳、乌鲁木齐、温州、济南无数据");
+    if (["贵阳市", "乌鲁木齐市", "温州市", "济南市", "兰州市"].indexOf(city) != -1) {
+      alert("当前贵阳、乌鲁木齐、温州、济南、兰州无数据");
     } else {
       $.getScript("https://api.map.baidu.com/api?type=subway&v=1.0&ak=CrkK1Axboq7E3K93fOE0GHfjII2z8Lwf&s=1")
         .done(function () {
@@ -312,6 +315,9 @@ jQuery.noConflict();
         $("#brtBtn").attr("disabled", true).addClass("disable");
       }
     });
+  });
+  $("#diyBtn").click(function () {
+    alert("因功能定位不同，DIY模式从主网站分离，待功能完善后择日开放入口");
   });
   $("#clearBtn").click(function () {
     clear();
