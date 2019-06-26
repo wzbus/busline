@@ -317,7 +317,8 @@ jQuery.noConflict();
     });
   });
   $("#diyBtn").click(function () {
-    alert("因功能定位不同，DIY模式从主网站分离，待功能完善后择日开放入口");
+    let poi = map.getCenter();
+    window.open(`diy.html?lng=${poi.lng}&lat=${poi.lat}`);
   });
   $("#clearBtn").click(function () {
     clear();

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<title>公交线路图 - DIY模式</title>
+<style type="text/css">
+  * {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: "Microsoft YaHei";
+    outline: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #map {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #draw {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 0 5px;
+    border: 1px solid #5298ff;
+    border-radius: 5px;
+    background: #fff;
+  }
+
+  .drawItem,
+  .opt {
+    padding: 5px;
+    float: left;
+    cursor: pointer;
+  }
+
+  #option {
+    position: absolute;
+    top: 20px;
+    right: 500px;
+    padding: 0 5px;
+    border: 1px solid #5298ff;
+    border-radius: 5px;
+    background: #fff;
+  }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
+
+<body>
+  <div id="map"></div>
+  <div id="app">
+    <ul id="draw">
+      <li class="drawItem" id="polyline">折线</li>
+      <li class="drawItem" id="polygon">区块</li>
+      <li class="drawItem" id="point">图标</li>
+      <li class="drawItem" id="pathtext">文字</li>
+    </ul>
+    <!-- <ul id="option">
+      <li class="opt" id="undo">撤销</li>
+      <li class="opt" id="redo">重做</li>
+      <li class="opt" id="finish">完成</li>
+    </ul> -->
+  </div>
+  <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script>
+    let mapCenter = [120.68, 28.00];
+    let url = location.search;
+    if (url) {
+      let x = url.indexOf('lng=');
+      let y = url.indexOf('lat=');
+      if (x && y) {
+        let lng = url.substring(x + 4, y - 1);
+        let lat = url.substring(y + 4);
+        mapCenter = [lng, lat];
+      }
+    }
+    let map = new maptalks.Map('map', {
+      center: mapCenter,
+      zoom: 14,
+      minZoom: 1,
+      maxZoom: 19,
+      spatialReference: {
+        projection: 'baidu'
+      },
+      baseLayer: new maptalks.TileLayer('base', {
+        'urlTemplate': 'http://online{s}.map.bdimg.com/onlinelabel/?qt=tile&x={x}&y={y}&z={z}&styles=pl&scaler=1&p=1',
+        'subdomains': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        'attribution': '&copy; <a target="_blank" href="http://map.baidu.com">Baidu</a>'
+      })
+    });
+    let layer = new maptalks.VectorLayer('vector').addTo(map);
+    let drawTool = new maptalks.DrawTool({
+      mode: 'Point',
+      once: true
+    }).addTo(map).disable();
+    drawTool.on('drawend', function (param) {
+      layer.addGeometry(param.geometry);
+      map.resetCursor();
+    });
+    let plSymbol = {
+      'lineColor': '#5298FF',
+      'lineWidth': 5,
+      'lineJoin': 'round',
+      'lineCap': 'round',
+      'lineDasharray': null,
+      'lineOpacity ': 0.8
+    };
+    let pgSymbol = {
+      'polygonFill': '#5298FF',
+      'polygonOpacity': 0.5,
+      'lineColor': '#5298FF',
+      'lineWidth': 1,
+      'lineJoin': 'round',
+      'lineCap': 'round',
+      'lineDasharray': null,
+      'lineOpacity ': 0.8
+    };
+    let poSymbol = {
+      'markerFile': 'pic/station_icon.png',
+      'markerWidth': 11,
+      'markerHeight': 11,
+      'markerDx': 0,
+      'markerDy': 0,
+      'markerOpacity': 1
+    };
+    let ptSymbol = {
+      'lineColor': '#5298FF',
+      'lineWidth': 1,
+      'textFill': '#5298FF',
+      'textName': 'line',
+      'textPlacement': 'line',
+      'textSize': 16,
+      'textDy': -10
+    };
+    $("#polyline").click(function () {
+      drawTool.setMode('LineString').setSymbol(plSymbol).enable();
+      map.setCursor('crosshair');
+    });
+    $("#polygon").click(function () {
+      drawTool.setMode('Polygon').setSymbol(pgSymbol).enable();
+      map.setCursor('crosshair');
+    });
+    $("#point").click(function () {
+      drawTool.setMode('Point').setSymbol(poSymbol).enable();
+    });
+    $("#pathtext").click(function () {
+      drawTool.setMode('LineString').setSymbol(ptSymbol).enable();
+      map.setCursor('crosshair');
+    });
+  </script>
+</body>
+
+</html>
