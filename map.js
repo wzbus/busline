@@ -77,7 +77,7 @@ jQuery.noConflict();
         lineColor = $("#strokeColor").val();
       }
       polyline = new BMap.Polyline(busline.getPath(), getPolylineOptions());
-      let lineName = busline.name.substr(0, busline.name.indexOf("("));
+      let lineName = busline.name.substring(0, busline.name.indexOf("("));
       map.addOverlay(polyline);
       readyAdd.push(lineName.substring(0, lineName.length - 1));
       let stationList = [];

@@ -34,7 +34,7 @@
   }
 
   .drawItem,
-  .opt {
+  .optionItem {
     padding: 5px;
     float: left;
     cursor: pointer;
@@ -49,6 +49,101 @@
     border-radius: 5px;
     background: #fff;
   }
+
+  #container {
+    position: absolute;
+    width: 182px;
+    top: 75px;
+    right: 30px;
+    border: 1px solid #5298ff;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  .set {
+    padding: 5px 10px;
+    color: #fff;
+    background: #4b4a5e;
+    opacity: 0.8;
+  }
+
+  .sub {
+    display: none;
+    padding: 0 10px;
+    background: #f5f3f0;
+  }
+
+  .sub:nth-of-type(1) {
+    display: block;
+  }
+
+  .subContainer {
+    position: relative;
+    padding-bottom: 10px;
+  }
+
+  .opt {
+    position: relative;
+    padding-top: 10px;
+  }
+
+  .optTitle {
+    width: 60px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 14px;
+    text-align: center;
+    background: #c5464a;
+    color: #fff;
+    border-radius: 5px 0 0 5px;
+  }
+
+  .opt input,
+  .opt select {
+    position: absolute;
+    width: 100px;
+    height: 28px;
+    left: 60px;
+    top: 10px;
+    width: 100px;
+    padding: 0 5px;
+    border: 2px solid #c5464a;
+    border-radius: 0 5px 5px 0;
+    background: transparent;
+    text-align: right;
+  }
+
+  .opt input[type="number"] {
+    direction: rtl;
+  }
+
+  button {
+    border: 0;
+    cursor: pointer;
+  }
+
+  .btn {
+    margin-top: 10px;
+    padding: 5px 10px;
+    color: #fff;
+    background: #5298ff;
+    border-radius: 5px;
+  }
+
+  .btn:active,
+  #search:active {
+    background: #3385ff;
+  }
+
+  .icon {
+    float: right;
+  }
+
+  [v-cloak] {
+    display: none;
+  }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
@@ -57,102 +152,179 @@
   <div id="map"></div>
   <div id="app">
     <ul id="draw">
-      <li class="drawItem" id="polyline">折线</li>
-      <li class="drawItem" id="polygon">区块</li>
-      <li class="drawItem" id="point">图标</li>
-      <li class="drawItem" id="pathtext">文字</li>
+      <li class="drawItem" id="polyline" @click="drawpl">路径</li>
+      <li class="drawItem" id="polygon" @click="drawpg">区块</li>
+      <li class="drawItem" id="point" @click="drawpo">图标</li>
+      <li class="drawItem" id="pathtext" @click="drawpt">文字</li>
+      <li class="drawItem" id="config">设置</li>
     </ul>
     <!-- <ul id="option">
-      <li class="opt" id="undo">撤销</li>
-      <li class="opt" id="redo">重做</li>
-      <li class="opt" id="finish">完成</li>
+      <li class="optionItem" id="undo">撤销</li>
+      <li class="optionItem" id="redo">重做</li>
+      <li class="optionItem" id="finish">完成</li>
     </ul> -->
+    <ul id="container" v-show="showSet" v-cloak>
+      <li class="set">路径样式</li>
+      <div class="sub">
+        <div class="subContainer">
+          <div class="opt">
+            <p class="optTitle">名称</p>
+            <input type="text" placeholder="未命名" id="stationList">
+          </div>
+          <div class="opt">
+            <p class="optTitle">颜色</p>
+            <input type="color" id="strokeColor" v-model="plSymbol.lineColor">
+          </div>
+          <div class="opt">
+            <p class="optTitle">线宽</p>
+            <input type="number" id="strokeWeight" min="1" max="10" step="1" v-model="plSymbol.lineWidth">
+          </div>
+          <div class="opt">
+            <p class="optTitle">透明度</p>
+            <input type="number" id="strokeOpacity" min="0.1" max="1.0" step="0.1" v-model="plSymbol.lineOpacity">
+          </div>
+          <button id="finishBtn" class="btn" @click="closeSet">完成</button>
+        </div>
+      </div>
+    </ul>
   </div>
-  <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
   <script>
-    let mapCenter = [120.68, 28.00];
-    let url = location.search;
-    if (url) {
-      let x = url.indexOf('lng=');
-      let y = url.indexOf('lat=');
-      if (x && y) {
-        let lng = url.substring(x + 4, y - 1);
-        let lat = url.substring(y + 4);
-        mapCenter = [lng, lat];
-      }
-    }
-    let map = new maptalks.Map('map', {
-      center: mapCenter,
-      zoom: 14,
-      minZoom: 1,
-      maxZoom: 19,
-      spatialReference: {
-        projection: 'baidu'
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          showSet: false,
+          map: '',
+          layer: '',
+          drawTool: '',
+          geometry: '',
+          plSymbol: {
+            'lineColor': '#5298FF',
+            'lineWidth': 5,
+            'lineJoin': 'round',
+            'lineCap': 'round',
+            'lineDasharray': null,
+            'lineOpacity': 0.8
+          },
+          pgSymbol: {
+            'polygonFill': '#5298FF',
+            'polygonOpacity': 0.5,
+            'lineColor': '#5298FF',
+            'lineWidth': 1,
+            'lineJoin': 'round',
+            'lineCap': 'round',
+            'lineDasharray': null,
+            'lineOpacity': 0.8
+          },
+          poSymbol: {
+            'markerFile': 'pic/station_icon.png',
+            'markerWidth': 11,
+            'markerHeight': 11,
+            'markerDx': 0,
+            'markerDy': 0,
+            'markerOpacity': 1
+          },
+          ptSymbol: {
+            'lineColor': '#5298FF',
+            'lineWidth': 1,
+            'textFill': '#5298FF',
+            'textName': 'line',
+            'textPlacement': 'line',
+            'textSize': 16,
+            'textDy': -10
+          }
+        }
       },
-      baseLayer: new maptalks.TileLayer('base', {
-        'urlTemplate': 'http://online{s}.map.bdimg.com/onlinelabel/?qt=tile&x={x}&y={y}&z={z}&styles=pl&scaler=1&p=1',
-        'subdomains': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        'attribution': '&copy; <a target="_blank" href="http://map.baidu.com">Baidu</a>'
-      })
-    });
-    let layer = new maptalks.VectorLayer('vector').addTo(map);
-    let drawTool = new maptalks.DrawTool({
-      mode: 'Point',
-      once: true
-    }).addTo(map).disable();
-    drawTool.on('drawend', function (param) {
-      layer.addGeometry(param.geometry);
-      map.resetCursor();
-    });
-    let plSymbol = {
-      'lineColor': '#5298FF',
-      'lineWidth': 5,
-      'lineJoin': 'round',
-      'lineCap': 'round',
-      'lineDasharray': null,
-      'lineOpacity ': 0.8
-    };
-    let pgSymbol = {
-      'polygonFill': '#5298FF',
-      'polygonOpacity': 0.5,
-      'lineColor': '#5298FF',
-      'lineWidth': 1,
-      'lineJoin': 'round',
-      'lineCap': 'round',
-      'lineDasharray': null,
-      'lineOpacity ': 0.8
-    };
-    let poSymbol = {
-      'markerFile': 'pic/station_icon.png',
-      'markerWidth': 11,
-      'markerHeight': 11,
-      'markerDx': 0,
-      'markerDy': 0,
-      'markerOpacity': 1
-    };
-    let ptSymbol = {
-      'lineColor': '#5298FF',
-      'lineWidth': 1,
-      'textFill': '#5298FF',
-      'textName': 'line',
-      'textPlacement': 'line',
-      'textSize': 16,
-      'textDy': -10
-    };
-    $("#polyline").click(function () {
-      drawTool.setMode('LineString').setSymbol(plSymbol).enable();
-      map.setCursor('crosshair');
-    });
-    $("#polygon").click(function () {
-      drawTool.setMode('Polygon').setSymbol(pgSymbol).enable();
-      map.setCursor('crosshair');
-    });
-    $("#point").click(function () {
-      drawTool.setMode('Point').setSymbol(poSymbol).enable();
-    });
-    $("#pathtext").click(function () {
-      drawTool.setMode('LineString').setSymbol(ptSymbol).enable();
-      map.setCursor('crosshair');
+      methods: {
+        drawpl() {
+          this.drawTool.setMode('LineString').setSymbol(this.plSymbol).enable();
+          this.map.setCursor('crosshair');
+        },
+        drawpg() {
+          this.drawTool.setMode('Polygon').setSymbol(this.pgSymbol).enable();
+          this.map.setCursor('crosshair');
+        },
+        drawpo() {
+          this.drawTool.setMode('Point').setSymbol(this.poSymbol).enable();
+          this.map.setCursor('pointer');
+        },
+        drawpt() {
+          this.drawTool.setMode('LineString').setSymbol(this.ptSymbol).enable();
+          this.map.setCursor('crosshair');
+        },
+        closeSet() {
+          this.layer.getGeometryById(this.geometry).endEdit();
+          this.showSet = false;
+        }
+      },
+      watch: {
+        plSymbol: {
+          handler(val) {
+            this.layer.getGeometryById(this.geometry).updateSymbol(val);
+          },
+          deep: true
+        }
+      },
+      mounted() {
+        let that = this;
+        let mapCenter = [120.70, 28.00];
+        let url = location.search;
+        if (url) {
+          let x = url.indexOf('lng=');
+          let y = url.indexOf('lat=');
+          if (x && y) {
+            let lng = url.substring(x + 4, y - 1);
+            let lat = url.substring(y + 4);
+            mapCenter = [lng, lat];
+          }
+        }
+        this.map = new maptalks.Map('map', {
+          center: mapCenter,
+          zoom: 14,
+          minZoom: 1,
+          maxZoom: 19,
+          doubleClickZoom: false,
+          spatialReference: {
+            projection: 'baidu'
+          },
+          baseLayer: new maptalks.TileLayer('base', {
+            'urlTemplate': 'http://online{s}.map.bdimg.com/onlinelabel/?qt=tile&x={x}&y={y}&z={z}&styles=pl&scaler=1&p=1',
+            'subdomains': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+            'attribution': '&copy; <a target="_blank" href="http://map.baidu.com">Baidu</a>'
+          })
+        });
+        let metric = new maptalks.control.Scale({
+          'position': 'bottom-left',
+          'maxWidth': 100,
+          'metric': true,
+          'imperial': false
+        });
+        this.map.addControl(metric);
+        this.layer = new maptalks.VectorLayer('vector').addTo(this.map);
+        this.drawTool = new maptalks.DrawTool({
+          mode: 'Point',
+          once: true,
+          autoPanAtEdge: true
+        }).addTo(this.map).disable();
+        this.drawTool.on('drawend', function () {
+          let randomId = Math.ceil(Math.random() * 10);
+          that.geometry = randomId;
+          let g = this.getCurrentGeometry();
+          that.layer.addGeometry(g);
+          that.map.resetCursor();
+          g.startEdit();
+          g.setId(randomId);
+          g.on('click', function () {
+            this.startEdit();
+            that.geometry = this.getId();
+            that.showSet = true;
+          });
+          if (g.getType() == 'LineString') {
+            that.showSet = true;
+          }
+        });
+      }
     });
   </script>
 </body>
