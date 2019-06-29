@@ -23,6 +23,16 @@
     overflow: hidden;
   }
 
+  #xy {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    line-height: 24px;
+    padding: 0 5px;
+    font-size: 12px;
+    color: #4b4a5e;
+  }
+
   #draw {
     position: absolute;
     top: 20px;
@@ -62,7 +72,8 @@
     -ms-user-select: none;
   }
 
-  .set {
+  .set,
+  .layers_nav {
     padding: 5px 10px;
     color: #fff;
     background: #4b4a5e;
@@ -115,6 +126,13 @@
     text-align: right;
   }
 
+  select {
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    direction: rtl;
+  }
+
   .opt input[type="number"] {
     direction: rtl;
   }
@@ -141,6 +159,31 @@
     float: right;
   }
 
+  .layers {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 180px;
+    background: #fff;
+  }
+
+  .layers_ul {
+    min-height: 32px;
+    max-height: 480px;
+    padding: 0 10px;
+    background: #f5f3f0;
+    border: 1px solid #5298ff;
+    overflow-y: scroll;
+  }
+
+  .layers_li {
+    padding: 5px 0;
+  }
+
+  .layers_option {
+    float: right;
+  }
+
   [v-cloak] {
     display: none;
   }
@@ -150,20 +193,20 @@
 
 <body>
   <div id="map"></div>
-  <div id="app">
+  <div id="xy"></div>
+  <div id="app" v-cloak>
     <ul id="draw">
-      <li class="drawItem" id="polyline" @click="drawpl">路径</li>
-      <li class="drawItem" id="polygon" @click="drawpg">区块</li>
-      <li class="drawItem" id="point" @click="drawpo">图标</li>
-      <li class="drawItem" id="pathtext" @click="drawpt">文字</li>
-      <li class="drawItem" id="config">设置</li>
+      <li class="drawItem" @click="drawpl">路径</li>
+      <li class="drawItem" @click="drawpg">区块</li>
+      <li class="drawItem" @click="drawpo">图标</li>
+      <li class="drawItem" @click="drawpt">文字</li>
+      <li class="drawItem" @click="openSet">管理</li>
     </ul>
     <!-- <ul id="option">
-      <li class="optionItem" id="undo">撤销</li>
-      <li class="optionItem" id="redo">重做</li>
-      <li class="optionItem" id="finish">完成</li>
+      <li class="optionItem" @click="undo">撤销</li>
+      <li class="optionItem" @click="redo">重做</li>
     </ul> -->
-    <ul class="container" v-show="showSet==='pl'" v-cloak>
+    <ul class="container" v-show="showSet==='pl'">
       <li class="set">路径样式</li>
       <div class="sub">
         <div class="subContainer">
@@ -183,11 +226,11 @@
             <p class="optTitle">透明度</p>
             <input type="number" min="0.1" max="1.0" step="0.1" v-model="plSymbol.lineOpacity">
           </div>
-          <button id="finishBtn" class="btn" @click="closeSet">完成</button>
+          <button class="btn" @click="closeSet">完成</button>
         </div>
       </div>
     </ul>
-    <ul class="container" v-show="showSet==='pg'" v-cloak>
+    <ul class="container" v-show="showSet==='pg'">
       <li class="set">区块样式</li>
       <div class="sub">
         <div class="subContainer">
@@ -215,11 +258,11 @@
             <p class="optTitle">块透明</p>
             <input type="number" min="0.1" max="1.0" step="0.1" v-model="pgSymbol.polygonOpacity">
           </div>
-          <button id="finishBtn" class="btn" @click="closeSet">完成</button>
+          <button class="btn" @click="closeSet">完成</button>
         </div>
       </div>
     </ul>
-    <ul class="container" v-show="showSet==='po'" v-cloak>
+    <ul class="container" v-show="showSet==='po'">
       <li class="set">图标样式</li>
       <div class="sub">
         <div class="subContainer">
@@ -251,11 +294,11 @@
             <p class="optTitle">透明度</p>
             <input type="number" min="0.1" max="1.0" step="0.1" v-model="poSymbol.markerOpacity">
           </div>
-          <button id="finishBtn" class="btn" @click="closeSet">完成</button>
+          <button class="btn" @click="closeSet">完成</button>
         </div>
       </div>
     </ul>
-    <ul class="container" v-show="showSet==='pt'" v-cloak>
+    <ul class="container" v-show="showSet==='pt'">
       <li class="set">文字样式</li>
       <div class="sub">
         <div class="subContainer">
@@ -271,10 +314,47 @@
             <p class="optTitle">大小</p>
             <input type="number" min="12" max="24" step="1" v-model="ptSymbol.textSize">
           </div>
-          <button id="finishBtn" class="btn" @click="closeSet">完成</button>
+          <button class="btn" @click="closeSet">完成</button>
         </div>
       </div>
     </ul>
+    <ul class="container" v-show="showSet==='dt'">
+      <li class="set">地图管理</li>
+      <div class="sub">
+        <div class="subContainer">
+          <div class="opt">
+            <p class="optTitle">数据</p>
+            <select v-model="origin" @change="setMap">
+              <option value="baidu">百度</option>
+              <option value="tianditu">天地图</option>
+            </select>
+          </div>
+          <div class="opt">
+            <p class="optTitle">风格</p>
+            <select v-model="style" @change="setMap">
+              <option value="none">默认</option>
+              <option value="grayscale(100%)">灰白</option>
+              <option value="sepia(100%) invert(90%)">暗黑</option>
+            </select>
+          </div>
+          <button class="btn" @click="share">导出链接</button>
+        </div>
+      </div>
+    </ul>
+    <div class="layers" v-show="showLayers">
+      <div class="layers_nav">图层管理<span class="icon" @click="closeLayers">×</span></div>
+      <ul class="layers_ul">
+        <li class="layers_li" v-for="(item, index) of layers" :key="index">
+          <span class="layers_name">{{item}}</span>
+          <div class="layers_option">
+            <span class="layers_opt" @click="upLayer(index)">↑</span>
+            <span class="layers_opt" @click="downLayer(index)">↓</span>
+            <span class="layers_opt" @click="showLayer(item)">-</span>
+            <span class="layers_opt" @click="removeLayer(item,index)">×</span>
+          </div>
+        </li>
+      </ul>
+    </div>
   </div>
   <script type="text/javascript" src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
   <script type="text/javascript" src="diy.js"></script>
