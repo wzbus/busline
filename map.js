@@ -31,8 +31,10 @@ jQuery.noConflict();
   map.addControl(new BMap.CityListControl({
     anchor: BMAP_ANCHOR_TOP_LEFT,
     offset: new BMap.Size(10, 10),
-    onChangeSuccess: function(e) {
+    onChangeSuccess: function (e) {
       city = e.city;
+      clear();
+      brtlist = '';
     }
   }));
   var cr = new BMap.CopyrightControl({
@@ -179,8 +181,8 @@ jQuery.noConflict();
     map.clearOverlays();
     readyAdd = [];
     colorList = [];
+    brtlist = "";
     $(".remark").hide();
-    $("#brtBtn").attr("disabled", false).removeClass("disable");
   }
   $("#busList").bind("input propertychange", function () {
     inputLine = $(this).val();
@@ -301,20 +303,25 @@ jQuery.noConflict();
     $("#subway").hide();
   });
   $("#brtBtn").click(function () {
-    $.getJSON("brt.json", function (res) {
-      if (res[city]) {
-        clear();
-        brtlist = res[city];
-        colorOption = $("#randomColor").val();
-        enableAutoViewport = false;
-        for (let i = 0, len = brtlist.length; i < len; i++) {
-          if ($.inArray(brtlist[i], readyAdd) == -1) {
-            bus.getBusList(brtlist[i]);
+    if (!brtlist) {
+      $.getJSON("brt.json", function (res) {
+        if (res[city]) {
+          clear();
+          brtlist = res[city];
+          colorOption = $("#randomColor").val();
+          enableAutoViewport = false;
+          for (let i = 0, len = brtlist.length; i < len; i++) {
+            if ($.inArray(brtlist[i], readyAdd) == -1) {
+              bus.getBusList(brtlist[i]);
+            }
           }
+        } else {
+          alert("当前城市无快速公交BRT路线");
         }
-        $("#brtBtn").attr("disabled", true).addClass("disable");
-      }
-    });
+      });
+    } else {
+      alert("已添加BRT路线，请清除所有标识后重试");
+    }
   });
   $("#diyBtn").click(function () {
     let poi = map.getCenter();

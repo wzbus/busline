@@ -210,10 +210,10 @@
       <li class="set">路径样式</li>
       <div class="sub">
         <div class="subContainer">
-          <div class="opt">
+          <!-- <div class="opt">
             <p class="optTitle">名称</p>
             <input type="text" placeholder="未命名">
-          </div>
+          </div> -->
           <div class="opt">
             <p class="optTitle">颜色</p>
             <input type="color" v-model="plSymbol.lineColor">
@@ -226,6 +226,13 @@
             <p class="optTitle">透明度</p>
             <input type="number" min="0.1" max="1.0" step="0.1" v-model="plSymbol.lineOpacity">
           </div>
+          <div class="opt">
+            <p class="optTitle">平滑</p>
+            <select v-model="smooth" @change="setSmooth">
+              <option value="true">是</option>
+              <option value="false">否</option>
+            </select>
+          </div>
           <button class="btn" @click="closeSet">完成</button>
         </div>
       </div>
@@ -234,10 +241,10 @@
       <li class="set">区块样式</li>
       <div class="sub">
         <div class="subContainer">
-          <div class="opt">
+          <!-- <div class="opt">
             <p class="optTitle">名称</p>
             <input type="text" placeholder="未命名">
-          </div>
+          </div> -->
           <div class="opt">
             <p class="optTitle">边框色</p>
             <input type="color" v-model="pgSymbol.lineColor">
@@ -266,10 +273,10 @@
       <li class="set">图标样式</li>
       <div class="sub">
         <div class="subContainer">
-          <div class="opt">
+          <!-- <div class="opt">
             <p class="optTitle">名称</p>
             <input type="text" placeholder="未命名">
-          </div>
+          </div> -->
           <div class="opt">
             <p class="optTitle">边框色</p>
             <input type="color" v-model="poSymbol.markerLineColor">
@@ -302,10 +309,10 @@
       <li class="set">文字样式</li>
       <div class="sub">
         <div class="subContainer">
-          <div class="opt">
+          <!-- <div class="opt">
             <p class="optTitle">名称</p>
             <input type="text" v-model="ptSymbol.textName">
-          </div>
+          </div> -->
           <div class="opt">
             <p class="optTitle">颜色</p>
             <input type="color" v-model="ptSymbol.textFill">

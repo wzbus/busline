@@ -10,6 +10,7 @@ new Vue({
       drawTool: '',
       mode: '',
       cur: '',
+      smooth: 'false',
       showSet: '',
       showLayers: false,
       plDefSymbol: {
@@ -130,6 +131,13 @@ new Vue({
         this.cur.endEdit();
       }
     },
+    setSmooth () {
+      if (this.smooth) {
+        this.cur.endEdit().setOptions({ 'smoothness': 0.5 });
+      } else {
+        this.cur.endEdit().setOptions({ 'smoothness': 0 });
+      }
+    },
     undo () {
       this.cur.undoEdit();
     },
@@ -149,7 +157,7 @@ new Vue({
         let temp = this.layers[i - 1];
         this.layers[i - 1] = this.layers[i];
         this.layers[i] = temp;
-        this.map.sortLayers(this.layers);
+        this.map.sortLayers([...this.layers].reverse());
         this.showLayers = true;
       }
     },
@@ -159,7 +167,7 @@ new Vue({
         let temp = this.layers[i + 1];
         this.layers[i + 1] = this.layers[i];
         this.layers[i] = temp;
-        this.map.sortLayers(this.layers);
+        this.map.sortLayers([...this.layers].reverse());
         this.showLayers = true;
       }
     },
@@ -179,13 +187,13 @@ new Vue({
       }
     },
     openSet () {
-      this.showSet = true;
+      this.showSet = 'dt';
       this.showLayers = true;
     },
     share () {
       alert('暂不可用');
-      let mapJson = this.map.toJSON();
-      console.log(mapJson);
+      // let mapJson = this.map.toJSON();
+      // console.log(mapJson);
     }
   },
   watch: {
@@ -247,7 +255,7 @@ new Vue({
       })
     }).on('mousemove', function (param) {
       let xy = document.getElementById('xy');
-      xy.innerHTML = param.coordinate.x.toFixed(5) + ',' + param.coordinate.y.toFixed(5)
+      xy.innerHTML = param.coordinate.x.toFixed(5) + ',' + param.coordinate.y.toFixed(5);
     });
     let metric = new maptalks.control.Scale({
       'position': 'bottom-left',
@@ -265,32 +273,33 @@ new Vue({
     this.drawTool.on('drawend', function (param) {
       i++;
       that.layers.unshift('图层' + i);
-      new maptalks.VectorLayer('图层' + i).addTo(that.map).addGeometry(param.geometry);
+      new maptalks.VectorLayer('图层' + i).addTo(that.map).bringToFront().addGeometry(param.geometry);
       that.map.resetCursor();
       that.cur = param.geometry;
       param.geometry.setProperties({ 'mode': that.mode });
-      param.geometry.on('click', function () {
+      param.geometry.on('dblclick', function () {
         if (that.cur) {
           that.cur.endEdit();
         }
         that.cur = this;
-        if (that.mode !== 'pt') {
-          this.startEdit();
-        }
         switch (this.getProperties().mode) {
           case 'pl':
+            this.startEdit({ 'centerHandleSymbol': 'none' });
             that.showSet = 'pl';
             that.plSymbol = this.getSymbol();
             break;
           case 'pg':
+            this.startEdit();
             that.showSet = 'pg';
             that.pgSymbol = this.getSymbol();
             break;
           case 'po':
+            this.startEdit({ 'vertexHandleSymbol': 'none' });
             that.showSet = 'po';
             that.poSymbol = this.getSymbol();
             break;
           case 'pt':
+            this.startEdit({ 'centerHandleSymbol': 'none' });
             that.showSet = 'pt';
             that.ptSymbol = this.getSymbol();
             break;
