@@ -3,6 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <title>公交线路图 - DIY模式</title>
+<link rel="stylesheet" href="css/iconfont.css">
 <style type="text/css">
   * {
     margin: 0;
@@ -33,17 +34,62 @@
     color: #4b4a5e;
   }
 
-  #draw {
+  .drawBar {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 0 5px;
-    border: 1px solid #5298ff;
-    border-radius: 5px;
-    background: #fff;
+    top: 50px;
+    right: 10px;
   }
 
-  .drawItem,
+  .drawItem {
+    position: relative;
+    margin-bottom: 10px;
+  }
+
+  .drawBtn {
+    width: 35px;
+    height: 35px;
+    line-height: 35px;
+    font-size: 16px;
+    text-align: center;
+    border-radius: 50%;
+    color: #5298ff;
+    background: #f5f3f0;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+  }
+
+  .infoContainer {
+    position: absolute;
+    top: 0px;
+    right: 50px;
+    opacity: 0;
+  }
+
+  .info {
+    padding: 5px 5px 5px 10px;
+    font-size: 16px;
+    color: #333;
+    background-color: #B3D8FF;
+    border-radius: 5px;
+    word-break:keep-all;
+  }
+
+  .triangle {
+    position: absolute;
+    top: calc(50% - 10px);
+    right: -20px;
+    width: 0;
+    height: 0;
+    border: 10px solid;
+    border-color: transparent transparent transparent #B3D8FF;
+  }
+
+  .drawBtn:hover+.infoContainer {
+    animation: show 1s;
+    -webkit-animation: show 1s;
+    animation-fill-mode: forwards;
+  }
+
   .optionItem {
     padding: 5px;
     float: left;
@@ -63,8 +109,8 @@
   .container {
     position: absolute;
     width: 182px;
-    top: 75px;
-    right: 30px;
+    top: 50px;
+    right: 55px;
     border: 1px solid #5298ff;
     user-select: none;
     -webkit-user-select: none;
@@ -187,6 +233,16 @@
   [v-cloak] {
     display: none;
   }
+
+  @keyframes show {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
@@ -195,12 +251,42 @@
   <div id="map"></div>
   <div id="xy"></div>
   <div id="app" v-cloak>
-    <ul id="draw">
-      <li class="drawItem" @click="drawpl">路径</li>
-      <li class="drawItem" @click="drawpg">区块</li>
-      <li class="drawItem" @click="drawpo">图标</li>
-      <li class="drawItem" @click="drawpt">文字</li>
-      <li class="drawItem" @click="openSet">管理</li>
+    <ul class="drawBar">
+      <li class="drawItem">
+        <button class="iconfont drawBtn" @click="draw('LineString', 'pl', plDefSymbol)">&#xe617;</button>
+        <div class="infoContainer">
+          <div class="info">添加折线</div>
+          <div class="triangle"></div>
+        </div>
+      </li>
+      <li class="drawItem">
+        <button class="iconfont drawBtn" @click="draw('Polygon', 'pg', pgDefSymbol)">&#xe619;</button>
+        <div class="infoContainer">
+          <div class="info">添加多边形</div>
+          <div class="triangle"></div>
+        </div>
+      </li>
+      <li class="drawItem">
+        <button class="iconfont drawBtn" @click="draw('Point', 'po', poDefSymbol)">&#xe604;</button>
+        <div class="infoContainer">
+          <div class="info">添加折线</div>
+          <div class="triangle"></div>
+        </div>
+      </li>
+      <li class="drawItem">
+        <button class="iconfont drawBtn" @click="draw('Point', 'pt', ptDefSymbol)">&#xe632;</button>
+        <div class="infoContainer">
+          <div class="info">添加图标</div>
+          <div class="triangle"></div>
+        </div>
+      </li>
+      <li class="drawItem">
+        <button class="iconfont drawBtn" @click="openSet">&#xe61f;</button>
+        <div class="infoContainer">
+          <div class="info">添加文字</div>
+          <div class="triangle"></div>
+        </div>
+      </li>
     </ul>
     <!-- <ul id="option">
       <li class="optionItem" @click="undo">撤销</li>
@@ -278,22 +364,21 @@
             <input type="text" placeholder="未命名">
           </div> -->
           <div class="opt">
+            <p class="optTitle">形状</p>
+            <select v-model="shape" @change="setShape">
+              <option value="circle">圆点</option>
+              <option value="bubble">气泡</option>
+            </select>
+          </div>
+          <div class="opt" v-show="shape==='circle'">
             <p class="optTitle">边框色</p>
             <input type="color" v-model="poSymbol.markerLineColor">
           </div>
-          <div class="opt">
+          <div class="opt" v-show="shape==='circle'">
             <p class="optTitle">填充色</p>
             <input type="color" v-model="poSymbol.markerFill">
           </div>
-          <div class="opt">
-            <p class="optTitle">宽度</p>
-            <input type="number" min="8" max="20" step="1" v-model="poSymbol.markerWidth">
-          </div>
-          <div class="opt">
-            <p class="optTitle">高度</p>
-            <input type="number" min="8" max="20" step="1" v-model="poSymbol.markerHeight">
-          </div>
-          <div class="opt">
+          <div class="opt" v-show="shape==='circle'">
             <p class="optTitle">线宽</p>
             <input type="number" min="1" max="10" step="1" v-model="poSymbol.markerLineWidth">
           </div>
@@ -364,7 +449,8 @@
     </div>
   </div>
   <script type="text/javascript" src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
-  <script type="text/javascript" src="diy.js"></script>
+  <script type="text/javascript" src="js/diy.js"></script>
+  <script type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277659095&web_id=1277659095"></script>
 </body>
 
 </html>
