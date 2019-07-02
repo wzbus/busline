@@ -4,6 +4,7 @@
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <title>公交线路图 - DIY模式</title>
 <link rel="stylesheet" href="css/iconfont.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
 <style type="text/css">
   * {
     margin: 0;
@@ -48,7 +49,6 @@
   .drawBtn {
     width: 35px;
     height: 35px;
-    line-height: 35px;
     font-size: 16px;
     text-align: center;
     border-radius: 50%;
@@ -244,7 +244,6 @@
     }
   }
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
 
 <body>
@@ -269,21 +268,21 @@
       <li class="drawItem">
         <button class="iconfont drawBtn" @click="draw('Point', 'po', poDefSymbol)">&#xe604;</button>
         <div class="infoContainer">
-          <div class="info">添加折线</div>
+          <div class="info">添加图标</div>
           <div class="triangle"></div>
         </div>
       </li>
       <li class="drawItem">
         <button class="iconfont drawBtn" @click="draw('Point', 'pt', ptDefSymbol)">&#xe632;</button>
         <div class="infoContainer">
-          <div class="info">添加图标</div>
+          <div class="info">添加文字</div>
           <div class="triangle"></div>
         </div>
       </li>
       <li class="drawItem">
         <button class="iconfont drawBtn" @click="openSet">&#xe61f;</button>
         <div class="infoContainer">
-          <div class="info">添加文字</div>
+          <div class="info">管理</div>
           <div class="triangle"></div>
         </div>
       </li>

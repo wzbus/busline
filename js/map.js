@@ -336,14 +336,10 @@ jQuery.noConflict();
     });
     $("#layerBtn").removeClass("disable").text("显示实时路况");
   });
-  $(".set").click(function () {
-    if ($(this).next().is(":hidden")) {
-      $(this).find(".icon").text("-");
-      $(this).siblings(".set").find(".icon").text("+");
-    } else {
-      $(this).find(".icon").text("+");
-    }
-    $(this).siblings(".set").next().hide();
-    $(this).next().slideToggle();
+  $(".drawBtn").not("#clearBtn").click(function () {
+    $(this).next().slideToggle().parent().siblings().find(".container").hide();
+  });
+  $(".closeBtn").click(function () {
+    $(this).parent().parent().slideToggle();
   });
 })(jQuery);
