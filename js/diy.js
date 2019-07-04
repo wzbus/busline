@@ -19,21 +19,43 @@ let map = new maptalks.Map('map', {
     projection: 'baidu'
   },
   baseLayer: new maptalks.TileLayer('base', {
-    'urlTemplate': 'http://online{s}.map.bdimg.com/onlinelabel/?qt=tile&x={x}&y={y}&z={z}&styles=pl&scaler=1&p=1',
-    'subdomains': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    'attribution': '&copy; <a target="_blank" href="http://map.baidu.com">Baidu</a>'
+    urlTemplate: 'http://online{s}.map.bdimg.com/onlinelabel/?qt=tile&x={x}&y={y}&z={z}&styles=pl&scaler=1&p=1',
+    subdomains: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    attribution: '&copy; <a target="_blank" href="http://map.baidu.com">Baidu</a>'
   })
-}).on('mousemove', function (param) {
-  let xy = document.getElementById('xy');
-  xy.innerHTML = param.coordinate.x.toFixed(5) + ',' + param.coordinate.y.toFixed(5);
 });
-let metric = new maptalks.control.Scale({
-  'position': 'bottom-left',
-  'maxWidth': 100,
-  'metric': true,
-  'imperial': false
-});
-map.addControl(metric);
+const coordOptions = {
+  position: {
+    bottom: 0,
+    right: 0
+  },
+  style: {
+    padding: '0 5px',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    fontSize: '13px'
+  }
+}
+class Coordinate extends maptalks.control.Control {
+  buildOn (map) {
+    let dom = document.createElement('div');
+    Object.assign(dom.style, this.options.style);
+    return dom;
+  }
+  onAdd () {
+    this._map.on('mousemove', function (event) {
+      this._controlDom.innerText = event.coordinate.x.toFixed(5) + " , " + event.coordinate.y.toFixed(5);
+    }, this);
+  }
+}
+Coordinate.mergeOptions(coordOptions);
+new Coordinate().addTo(map);
+new maptalks.control.Scale({
+  position: 'bottom-left',
+  maxWidth: 100,
+  metric: true,
+  imperial: false
+}).addTo(map);
+
 new Vue({
   el: '#app',
   data () {
@@ -50,34 +72,34 @@ new Vue({
       showSet: '',
       showLayers: false,
       plDefSymbol: {
-        'lineColor': '#5298FF',
-        'lineWidth': 3,
-        'lineJoin': 'round',
-        'lineCap': 'round',
-        'lineOpacity': 0.8
+        lineColor: '#5298FF',
+        lineWidth: 3,
+        lineJoin: 'round',
+        lineCap: 'round',
+        lineOpacity: 0.8
       },
       pgDefSymbol: {
-        'polygonFill': '#5298FF',
-        'polygonOpacity': 0.5,
-        'lineColor': '#5298FF',
-        'lineWidth': 1,
-        'lineJoin': 'round',
-        'lineCap': 'round',
-        'lineOpacity': 1
+        polygonFill: '#5298FF',
+        polygonOpacity: 0.5,
+        lineColor: '#5298FF',
+        lineWidth: 1,
+        lineJoin: 'round',
+        lineCap: 'round',
+        lineOpacity: 1
       },
       poDefSymbol: {
-        'markerType': 'ellipse',
-        'markerFill': "#ffffff",
-        'markerLineColor': '#5298FF',
-        'markerLineWidth': 2,
-        'markerWidth': 8,
-        'markerHeight': 8,
-        'markerOpacity': 1
+        markerType: 'ellipse',
+        markerFill: "#ffffff",
+        markerLineColor: '#5298FF',
+        markerLineWidth: 2,
+        markerWidth: 8,
+        markerHeight: 8,
+        markerOpacity: 1
       },
       ptDefSymbol: {
-        'textFill': '#5298FF',
-        'textName': '文字',
-        'textSize': 16,
+        textFill: '#5298FF',
+        textName: '文字',
+        textSize: 16,
       },
       plSymbol: {},
       pgSymbol: {},
@@ -91,24 +113,24 @@ new Vue({
         map.setSpatialReference({
           projection: 'baidu'
         }).setBaseLayer(new maptalks.TileLayer('base', {
-          'urlTemplate': 'http://online{s}.map.bdimg.com/onlinelabel/?qt=tile&x={x}&y={y}&z={z}&styles=pl&scaler=1&p=1',
-          'subdomains': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-          'attribution': '&copy; <a target="_blank" href="http://map.baidu.com">Baidu</a>',
-          'cssFilter': this.style
+          urlTemplate: 'http://online{s}.map.bdimg.com/onlinelabel/?qt=tile&x={x}&y={y}&z={z}&styles=pl&scaler=1&p=1',
+          subdomains: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+          attribution: '&copy; <a target="_blank" href="http://map.baidu.com">Baidu</a>',
+          cssFilter: this.style
         }));
       } else if (this.origin === 'tianditu') {
         map.setSpatialReference({
           projection: 'EPSG:4326'
         }).setBaseLayer(new maptalks.TileLayer('base', {
-          'tileSystem': [1, -1, -180, 90],
-          'urlTemplate': 'http://t{s}.tianditu.com/DataServer?T=vec_c&x={x}&y={y}&l={z}&tk=de0dc270a51aaca3dd4e64d4f8c81ff6',
-          'subdomains': ['1', '2', '3', '4', '5'],
-          'attribution': '&copy; <a target="_blank" href="http://www.tianditu.cn">Tianditu</a>',
-          'cssFilter': this.style
+          tileSystem: [1, -1, -180, 90],
+          urlTemplate: 'http://t{s}.tianditu.com/DataServer?T=vec_c&x={x}&y={y}&l={z}&tk=de0dc270a51aaca3dd4e64d4f8c81ff6',
+          subdomains: ['1', '2', '3', '4', '5'],
+          attribution: '&copy; <a target="_blank" href="http://www.tianditu.cn">Tianditu</a>',
+          cssFilter: this.style
         })).addLayer(new maptalks.TileLayer('road', {
-          'urlTemplate': 'http://t{s}.tianditu.com/DataServer?T=cva_c&x={x}&y={y}&l={z}&tk=de0dc270a51aaca3dd4e64d4f8c81ff6',
-          'subdomains': ['1', '2', '3', '4', '5'],
-          'opacity': 1
+          urlTemplate: 'http://t{s}.tianditu.com/DataServer?T=cva_c&x={x}&y={y}&l={z}&tk=de0dc270a51aaca3dd4e64d4f8c81ff6',
+          subdomains: ['1', '2', '3', '4', '5'],
+          opacity: 1
         }));
       }
     },
@@ -130,20 +152,20 @@ new Vue({
     setShape () {
       if (this.shape === 'circle') {
         this.poSymbol = {
-          'markerType': 'ellipse',
-          'markerFill': "#ffffff",
-          'markerLineColor': '#5298FF',
-          'markerLineWidth': 2,
-          'markerWidth': 8,
-          'markerHeight': 8,
-          'markerOpacity': 1
+          markerType: 'ellipse',
+          markerFill: "#ffffff",
+          markerLineColor: '#5298FF',
+          markerLineWidth: 2,
+          markerWidth: 8,
+          markerHeight: 8,
+          markerOpacity: 1
         }
       } else {
         this.poSymbol = {
-          'markerFile': 'pic/bubble_icon.png',
-          'markerWidth': 20,
-          'markerHeight': 35,
-          'markerOpacity': 1
+          markerFile: 'pic/bubble_icon.png',
+          markerWidth: 20,
+          markerHeight: 35,
+          markerOpacity: 1
         }
       }
     },
@@ -200,9 +222,8 @@ new Vue({
       this.showLayers = true;
     },
     share () {
-      alert('暂不可用');
-      // let mapJson = this.map.toJSON();
-      // console.log(mapJson);
+      let mapJson = this.map.toJSON();
+      console.log(mapJson);
     }
   },
   watch: {
@@ -236,7 +257,7 @@ new Vue({
     }
   },
   mounted () {
-    let that = this;
+    const that = this;
     this.drawTool = new maptalks.DrawTool({
       mode: 'LineString',
       once: true,
@@ -257,7 +278,7 @@ new Vue({
         that.cur = this;
         switch (this.getProperties().mode) {
           case 'pl':
-            this.startEdit({ 'centerHandleSymbol': 'none' });
+            this.startEdit({ centerHandleSymbol: 'none' });
             that.showSet = 'pl';
             that.plSymbol = this.getSymbol();
             break;
@@ -267,12 +288,12 @@ new Vue({
             that.pgSymbol = this.getSymbol();
             break;
           case 'po':
-            this.startEdit({ 'vertexHandleSymbol': 'none' });
+            this.startEdit({ vertexHandleSymbol: 'none' });
             that.showSet = 'po';
             that.poSymbol = this.getSymbol();
             break;
           case 'pt':
-            this.startEdit({ 'centerHandleSymbol': 'none' });
+            this.startEdit({ centerHandleSymbol: 'none' });
             that.showSet = 'pt';
             that.ptSymbol = this.getSymbol();
             break;

@@ -3,286 +3,47 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <title>公交线路图 - DIY模式</title>
-<link rel="stylesheet" href="css/iconfont.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
-<style type="text/css">
-  * {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    font-family: "Microsoft YaHei";
-    outline: 0;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-  }
-
-  html,
-  body,
-  #map {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
-
-  #xy {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    line-height: 24px;
-    padding: 0 5px;
-    font-size: 12px;
-    color: #4b4a5e;
-  }
-
-  .drawBar {
-    position: absolute;
-    top: 50px;
-    right: 10px;
-  }
-
-  .drawItem {
-    position: relative;
-    margin-bottom: 10px;
-  }
-
-  .drawBtn {
-    width: 35px;
-    height: 35px;
-    font-size: 16px;
-    text-align: center;
-    border-radius: 50%;
-    color: #5298ff;
-    background: #f5f3f0;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12);
-    cursor: pointer;
-  }
-
-  .infoContainer {
-    position: absolute;
-    top: 0px;
-    right: 50px;
-    opacity: 0;
-  }
-
-  .info {
-    padding: 5px 5px 5px 10px;
-    font-size: 16px;
-    color: #333;
-    background-color: #B3D8FF;
-    border-radius: 5px;
-    word-break:keep-all;
-  }
-
-  .triangle {
-    position: absolute;
-    top: calc(50% - 10px);
-    right: -20px;
-    width: 0;
-    height: 0;
-    border: 10px solid;
-    border-color: transparent transparent transparent #B3D8FF;
-  }
-
-  .drawBtn:hover+.infoContainer {
-    animation: show 1s;
-    -webkit-animation: show 1s;
-    animation-fill-mode: forwards;
-  }
-
-  .optionItem {
-    padding: 5px;
-    float: left;
-    cursor: pointer;
-  }
-
-  #option {
-    position: absolute;
-    top: 20px;
-    right: 500px;
-    padding: 0 5px;
-    border: 1px solid #5298ff;
-    border-radius: 5px;
-    background: #fff;
-  }
-
-  .container {
-    position: absolute;
-    width: 182px;
-    top: 50px;
-    right: 55px;
-    border: 1px solid #5298ff;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-  }
-
-  .set,
-  .layers_nav {
-    padding: 5px 10px;
-    color: #fff;
-    background: #4b4a5e;
-    opacity: 0.8;
-  }
-
-  .sub {
-    display: none;
-    padding: 0 10px;
-    background: #f5f3f0;
-  }
-
-  .sub:nth-of-type(1) {
-    display: block;
-  }
-
-  .subContainer {
-    position: relative;
-    padding-bottom: 10px;
-  }
-
-  .opt {
-    position: relative;
-    padding-top: 10px;
-  }
-
-  .optTitle {
-    width: 60px;
-    height: 28px;
-    line-height: 28px;
-    font-size: 14px;
-    text-align: center;
-    background: #c5464a;
-    color: #fff;
-    border-radius: 5px 0 0 5px;
-  }
-
-  .opt input,
-  .opt select {
-    position: absolute;
-    width: 100px;
-    height: 28px;
-    left: 60px;
-    top: 10px;
-    width: 100px;
-    padding: 0 5px;
-    border: 2px solid #c5464a;
-    border-radius: 0 5px 5px 0;
-    background: transparent;
-    text-align: right;
-  }
-
-  select {
-    appearance: none;
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    direction: rtl;
-  }
-
-  .opt input[type="number"] {
-    direction: rtl;
-  }
-
-  button {
-    border: 0;
-    cursor: pointer;
-  }
-
-  .btn {
-    margin-top: 10px;
-    padding: 5px 10px;
-    color: #fff;
-    background: #5298ff;
-    border-radius: 5px;
-  }
-
-  .btn:active,
-  #search:active {
-    background: #3385ff;
-  }
-
-  .icon {
-    float: right;
-  }
-
-  .layers {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    width: 180px;
-    background: #fff;
-  }
-
-  .layers_ul {
-    min-height: 32px;
-    max-height: 480px;
-    padding: 0 10px;
-    background: #f5f3f0;
-    border: 1px solid #5298ff;
-    overflow-y: scroll;
-  }
-
-  .layers_li {
-    padding: 5px 0;
-  }
-
-  .layers_option {
-    float: right;
-  }
-
-  [v-cloak] {
-    display: none;
-  }
-
-  @keyframes show {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
-  }
-</style>
+<link rel="stylesheet" href="css/iconfont.css">
+<link rel="stylesheet" href="css/diy.css">
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
 
 <body>
   <div id="map"></div>
-  <div id="xy"></div>
   <div id="app" v-cloak>
     <ul class="drawBar">
       <li class="drawItem">
         <button class="iconfont drawBtn" @click="draw('LineString', 'pl', plDefSymbol)">&#xe617;</button>
-        <div class="infoContainer">
-          <div class="info">添加折线</div>
+        <div class="tipBox">
+          <div class="tip">添加折线</div>
           <div class="triangle"></div>
         </div>
       </li>
       <li class="drawItem">
         <button class="iconfont drawBtn" @click="draw('Polygon', 'pg', pgDefSymbol)">&#xe619;</button>
-        <div class="infoContainer">
-          <div class="info">添加多边形</div>
+        <div class="tipBox">
+          <div class="tip">添加多边形</div>
           <div class="triangle"></div>
         </div>
       </li>
       <li class="drawItem">
         <button class="iconfont drawBtn" @click="draw('Point', 'po', poDefSymbol)">&#xe604;</button>
-        <div class="infoContainer">
-          <div class="info">添加图标</div>
+        <div class="tipBox">
+          <div class="tip">添加图标</div>
           <div class="triangle"></div>
         </div>
       </li>
       <li class="drawItem">
         <button class="iconfont drawBtn" @click="draw('Point', 'pt', ptDefSymbol)">&#xe632;</button>
-        <div class="infoContainer">
-          <div class="info">添加文字</div>
+        <div class="tipBox">
+          <div class="tip">添加文字</div>
           <div class="triangle"></div>
         </div>
       </li>
       <li class="drawItem">
         <button class="iconfont drawBtn" @click="openSet">&#xe61f;</button>
-        <div class="infoContainer">
-          <div class="info">管理</div>
+        <div class="tipBox">
+          <div class="tip">管理</div>
           <div class="triangle"></div>
         </div>
       </li>
@@ -292,13 +53,9 @@
       <li class="optionItem" @click="redo">重做</li>
     </ul> -->
     <ul class="container" v-show="showSet==='pl'">
-      <li class="set">路径样式</li>
-      <div class="sub">
+      <li class="banner">路径样式</li>
+      <div class="main">
         <div class="subContainer">
-          <!-- <div class="opt">
-            <p class="optTitle">名称</p>
-            <input type="text" placeholder="未命名">
-          </div> -->
           <div class="opt">
             <p class="optTitle">颜色</p>
             <input type="color" v-model="plSymbol.lineColor">
@@ -323,13 +80,9 @@
       </div>
     </ul>
     <ul class="container" v-show="showSet==='pg'">
-      <li class="set">区块样式</li>
-      <div class="sub">
+      <li class="banner">区块样式</li>
+      <div class="main">
         <div class="subContainer">
-          <!-- <div class="opt">
-            <p class="optTitle">名称</p>
-            <input type="text" placeholder="未命名">
-          </div> -->
           <div class="opt">
             <p class="optTitle">边框色</p>
             <input type="color" v-model="pgSymbol.lineColor">
@@ -355,13 +108,9 @@
       </div>
     </ul>
     <ul class="container" v-show="showSet==='po'">
-      <li class="set">图标样式</li>
-      <div class="sub">
+      <li class="banner">图标样式</li>
+      <div class="main">
         <div class="subContainer">
-          <!-- <div class="opt">
-            <p class="optTitle">名称</p>
-            <input type="text" placeholder="未命名">
-          </div> -->
           <div class="opt">
             <p class="optTitle">形状</p>
             <select v-model="shape" @change="setShape">
@@ -390,13 +139,9 @@
       </div>
     </ul>
     <ul class="container" v-show="showSet==='pt'">
-      <li class="set">文字样式</li>
-      <div class="sub">
+      <li class="banner">文字样式</li>
+      <div class="main">
         <div class="subContainer">
-          <!-- <div class="opt">
-            <p class="optTitle">名称</p>
-            <input type="text" v-model="ptSymbol.textName">
-          </div> -->
           <div class="opt">
             <p class="optTitle">颜色</p>
             <input type="color" v-model="ptSymbol.textFill">
@@ -410,11 +155,11 @@
       </div>
     </ul>
     <ul class="container" v-show="showSet==='dt'">
-      <li class="set">地图管理</li>
-      <div class="sub">
+      <li class="banner">地图管理</li>
+      <div class="main">
         <div class="subContainer">
           <div class="opt">
-            <p class="optTitle">数据</p>
+            <p class="optTitle">底图</p>
             <select v-model="origin" @change="setMap">
               <option value="baidu">百度</option>
               <option value="tianditu">天地图</option>
@@ -428,20 +173,19 @@
               <option value="sepia(100%) invert(90%)">暗黑</option>
             </select>
           </div>
-          <button class="btn" @click="share">导出链接</button>
         </div>
       </div>
     </ul>
     <div class="layers" v-show="showLayers">
-      <div class="layers_nav">图层管理<span class="icon" @click="closeLayers">×</span></div>
+      <div class="banner">图层管理<span class="iconfont closeBtn" @click="closeLayers">&#xe6e9;</span></div>
       <ul class="layers_ul">
         <li class="layers_li" v-for="(item, index) of layers" :key="index">
           <span class="layers_name">{{item}}</span>
           <div class="layers_option">
-            <span class="layers_opt" @click="upLayer(index)">↑</span>
-            <span class="layers_opt" @click="downLayer(index)">↓</span>
-            <span class="layers_opt" @click="showLayer(item)">-</span>
-            <span class="layers_opt" @click="removeLayer(item,index)">×</span>
+            <span class="iconfont layers_opt" @click="upLayer(index)">&#xe6a9;</span>
+            <span class="iconfont layers_opt" @click="downLayer(index)">&#xe6a8;</span>
+            <span class="iconfont layers_opt" @click="showLayer(item)">&#xe6e5;</span>
+            <span class="iconfont layers_opt" @click="removeLayer(item,index)">&#xe6e9;</span>
           </div>
         </li>
       </ul>

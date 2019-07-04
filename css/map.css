@@ -1,8 +1,6 @@
 * {
   margin: 0;
   padding: 0;
-  list-style: none;
-  font-family: "Microsoft YaHei";
   outline: 0;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -11,12 +9,20 @@
 html, body, #map, #subMap {
   width: 100%;
   height: 100%;
+  font-size: 16px;
+  font-family: "Microsoft YaHei";
   overflow: hidden;
+}
+ul {
+  list-style: none;
 }
 select {
   appearance: none;
   -moz-appearance: none;
   -webkit-appearance: none;
+  direction: rtl;
+}
+input[type="number"] {
   direction: rtl;
 }
 button {
@@ -60,6 +66,9 @@ button {
 .drawBtn_red {
   color: #c5464a;
 }
+.drawBtn:active {
+  background: #eee;
+}
 .container {
   display: none;
   position: absolute;
@@ -76,10 +85,16 @@ button {
   display: block;
 }
 .banner {
-  padding: 5px 10px;
+  line-height: 32px;
+  padding: 0 10px;
   color: #fff;
   background: #4b4a5e;
   opacity: 0.8;
+}
+.closeBtn {
+  line-height: 32px;
+  font-size: 12px;
+  float: right;
 }
 .main {
   padding: 0 10px;
@@ -116,9 +131,6 @@ button {
   background: transparent;
   text-align: right;
 }
-.opt input[type="number"] {
-  direction: rtl;
-}
 .btn {
   margin-top: 10px;
   padding: 5px 10px;
@@ -128,11 +140,6 @@ button {
 }
 .btn:active, #search:active {
   background: #3385ff;
-}
-.closeBtn {
-  margin-top: 6px;
-  font-size: 12px;
-  float: right;
 }
 .disable {
   background: #999;
