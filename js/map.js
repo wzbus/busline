@@ -245,17 +245,6 @@ jQuery.noConflict();
       forceLocal: "ture"
     });
   });
-  $("#layerBtn").click(function () {
-    if ($(this).hasClass("disable")) {
-      map.removeTileLayer(traffic);
-      $(this).removeClass("disable").text("显示实时路况");
-    } else if ($("#mapStyle").val() == "c10f815814efe92503249e060e268f4c") {
-      map.addTileLayer(traffic);
-      $(this).addClass("disable").text("关闭实时路况");
-    } else {
-      alert("该模式下不支持实时路况，请选择默认底图");
-    }
-  });
   $("#subBtn").click(function () {
     if (["贵阳市", "乌鲁木齐市", "温州市", "济南市", "兰州市"].indexOf(city) != -1) {
       alert("当前贵阳、乌鲁木齐、温州、济南、兰州无数据");
@@ -335,6 +324,15 @@ jQuery.noConflict();
       styleId: $(this).val()
     });
     $("#layerBtn").removeClass("disable").text("显示实时路况");
+  });
+  $("#mapLayer").change(function () {
+    if ($(this).val() == "false") {
+      map.removeTileLayer(traffic);
+    } else if ($("#mapStyle").val() == "c10f815814efe92503249e060e268f4c") {
+      map.addTileLayer(traffic);
+    } else {
+      alert("该模式下不支持实时路况，请选择默认底图");
+    }
   });
   $(".drawBtn").not("#clearBtn").click(function () {
     $(this).next().slideToggle().parent().siblings().find(".container").hide();

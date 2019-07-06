@@ -20,7 +20,7 @@
       <button class="iconfont drawBtn">&#xe617;</button>
       <div class="container visible">
         <p class="banner">绘制线路
-            <span class="iconfont closeBtn">&#xe6e9;</span>
+          <span class="iconfont closeBtn">&#xe6e9;</span>
         </p>
         <div class="main">
           <div class="subContainer">
@@ -63,15 +63,6 @@
                 <option value="false">不显示</option>
               </select>
             </div>
-            <div class="opt">
-              <p class="optTitle">底图</p>
-              <select id="mapStyle">
-                <option value="c10f815814efe92503249e060e268f4c">默认</option>
-                <option value="08fe74bc19167c842ae1cfa621be30f7">简化</option>
-                <option value="ac3a07ff1a65b1f2bfa7965a86f82fe5">灰白</option>
-                <option value="0ef8b85d5e6b011d83da7829ac17a041">暗黑</option>
-              </select>
-            </div>
             <button id="addBtn" class="btn">添加</button>
             <span class="iconfont question">&#xe609;</span>
             <div class="tipBox">
@@ -86,7 +77,7 @@
       <button class="iconfont drawBtn">&#xe604;</button>
       <div class="container">
         <p class="banner">检索站点
-            <span class="iconfont closeBtn">&#xe6e9;</span>
+          <span class="iconfont closeBtn">&#xe6e9;</span>
         </p>
         <div class="main">
           <div class="subContainer">
@@ -122,8 +113,23 @@
         </p>
         <div class="main">
           <div class="subContainer">
-            <button id="layerBtn" class="btn">显示实时路况</button>
-            <button id="subBtn" class="btn">显示地铁线路图</button>
+            <div class="opt">
+              <p class="optTitle">风格</p>
+              <select id="mapStyle">
+                <option value="c10f815814efe92503249e060e268f4c">默认</option>
+                <option value="08fe74bc19167c842ae1cfa621be30f7">简化</option>
+                <option value="ac3a07ff1a65b1f2bfa7965a86f82fe5">灰白</option>
+                <option value="0ef8b85d5e6b011d83da7829ac17a041">暗黑</option>
+              </select>
+            </div>
+            <div class="opt">
+              <p class="optTitle">路况</p>
+              <select id="mapLayer">
+                <option value="true">显示</option>
+                <option value="false" selected>不显示</option>
+              </select>
+            </div>
+            <button id="subBtn" class="btn">打开地铁线路图</button>
             <button id="brtBtn" class="btn">添加所有BRT线路</button>
             <button id="diyBtn" class="btn">DIY模式</button>
             <span class="iconfont question">&#xe609;</span>

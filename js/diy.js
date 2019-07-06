@@ -1,3 +1,8 @@
+window.onload = function () {
+  document.oncontextmenu = function () {
+    return false;
+  }
+};
 let mapCenter = [120.70, 28.00];
 let url = location.search;
 if (url) {
@@ -23,6 +28,16 @@ let map = new maptalks.Map('map', {
     subdomains: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
     attribution: '&copy; <a target="_blank" href="http://map.baidu.com">Baidu</a>'
   })
+});
+let drawTool = new maptalks.DrawTool({
+  mode: 'LineString',
+  once: true
+}).addTo(map).disable();
+map.on('contextmenu', function () {
+  if (drawTool.isEnabled() && !drawTool.getCurrentGeometry()) {
+    drawTool.disable();
+    map.resetCursor();
+  }
 });
 const coordOptions = {
   position: {
@@ -60,51 +75,73 @@ new Vue({
   el: '#app',
   data () {
     return {
+      list: [{
+        icon: '\ue617',
+        des: '添加折线',
+        fx: 'LineString',
+        fy: 'pl',
+        fz: {
+          lineColor: '#5298FF',
+          lineWidth: 3,
+          lineJoin: 'round',
+          lineCap: 'round',
+          lineOpacity: 0.8
+        }
+      }, {
+        icon: '\ue619',
+        des: '添加多边形',
+        fx: 'Polygon',
+        fy: 'pg',
+        fz: {
+          polygonFill: '#5298FF',
+          polygonOpacity: 0.5,
+          lineColor: '#5298FF',
+          lineWidth: 1,
+          lineJoin: 'round',
+          lineCap: 'round',
+          lineOpacity: 1
+        }
+      }, {
+        icon: '\ue604',
+        des: '添加图标',
+        fx: 'Point',
+        fy: 'po',
+        fz: {
+          markerType: 'ellipse',
+          markerFill: "#ffffff",
+          markerLineColor: '#5298FF',
+          markerLineWidth: 2,
+          markerWidth: 8,
+          markerHeight: 8,
+          markerOpacity: 1
+        }
+      }, {
+        icon: '\ue632',
+        des: '添加文字',
+        fx: 'Point',
+        fy: 'pt',
+        fz: {
+          textFill: '#5298FF',
+          textName: '文字',
+          textSize: 16,
+        }
+      }],
       origin: 'baidu',
       style: 'none',
       layer: '',
       layers: [],
-      drawTool: '',
       mode: '',
       cur: '',
       smooth: 'false',
       shape: 'circle',
       showSet: '',
       showLayers: false,
-      plDefSymbol: {
-        lineColor: '#5298FF',
-        lineWidth: 3,
-        lineJoin: 'round',
-        lineCap: 'round',
-        lineOpacity: 0.8
-      },
-      pgDefSymbol: {
-        polygonFill: '#5298FF',
-        polygonOpacity: 0.5,
-        lineColor: '#5298FF',
-        lineWidth: 1,
-        lineJoin: 'round',
-        lineCap: 'round',
-        lineOpacity: 1
-      },
-      poDefSymbol: {
-        markerType: 'ellipse',
-        markerFill: "#ffffff",
-        markerLineColor: '#5298FF',
-        markerLineWidth: 2,
-        markerWidth: 8,
-        markerHeight: 8,
-        markerOpacity: 1
-      },
-      ptDefSymbol: {
-        textFill: '#5298FF',
-        textName: '文字',
-        textSize: 16,
-      },
       plSymbol: {},
       pgSymbol: {},
       poSymbol: {},
-      ptSymbol: {}
+      ptSymbol: {},
+      udo: 0,
+      rdo: 0
     }
   },
   methods: {
@@ -136,9 +173,9 @@ new Vue({
     },
     draw (m, n, s) {
       this.mode = n;
-      this.drawTool.setMode(m).setSymbol(s).enable();
+      drawTool.setMode(m).setSymbol(s).enable();
       map.setCursor('crosshair');
-      if (this.cur) {
+      if (this.cur && drawTool.isEnabled()) {
         this.cur.endEdit();
       }
     },
@@ -184,42 +221,59 @@ new Vue({
     },
     upLayer (i) {
       if (i > 0) {
-        this.showLayers = false;
         let temp = this.layers[i - 1];
-        this.layers[i - 1] = this.layers[i];
-        this.layers[i] = temp;
-        map.sortLayers([...this.layers].reverse());
-        this.showLayers = true;
+        this.$set(this.layers, i - 1, this.layers[i]);
+        this.$set(this.layers, i, temp);
+        let arr = [];
+        for (let i in this.layers) {
+          arr.push(this.layers[i].name);
+        }
+        map.sortLayers([...arr].reverse());
       }
     },
     downLayer (i) {
       if (i < this.layers.length - 1) {
-        this.showLayers = false;
         let temp = this.layers[i + 1];
-        this.layers[i + 1] = this.layers[i];
-        this.layers[i] = temp;
-        map.sortLayers([...this.layers].reverse());
-        this.showLayers = true;
+        this.$set(this.layers, i + 1, this.layers[i]);
+        this.$set(this.layers, i, temp);
+        let arr = [];
+        for (let i in this.layers) {
+          arr.push(this.layers[i].name);
+        }
+        map.sortLayers([...arr].reverse());
       }
     },
-    showLayer (n) {
-      if (map.getLayer(n).isVisible()) {
-        map.getLayer(n).hide();
-      } else {
-        map.getLayer(n).show();
-      }
+    hideLayer (i) {
+      map.getLayer(this.layers[i].name).hide();
+      this.layers[i].isShow = false;
     },
-    removeLayer (n, i) {
+    showLayer (i) {
+      map.getLayer(this.layers[i].name).show();
+      this.layers[i].isShow = true;
+    },
+    removeLayer (i) {
       if (confirm("此操作会删除图层，是否继续？")) {
-        map.removeLayer(n);
+        map.removeLayer(this.layers[i].name);
         this.layers.splice(i, 1);
       } else {
         return false;
       }
     },
     openSet () {
-      this.showSet = 'dt';
-      this.showLayers = true;
+      if (this.showSet != 'dt') {
+        this.showSet = 'dt';
+        this.showLayers = true;
+      } else {
+        this.showSet = '';
+        this.showLayers = false;
+      }
+    },
+    save () {
+      map.toDataURL({
+        mimeType: 'image/jpeg',
+        save: true,
+        fileName: 'map'
+      });
     },
     share () {
       let mapJson = this.map.toJSON();
@@ -230,75 +284,75 @@ new Vue({
     plSymbol: {
       handler (val) {
         this.cur.updateSymbol(val);
-        this.plDefSymbol = val;
+        this.list[0].fz = val;
       },
       deep: true
     },
     pgSymbol: {
       handler (val) {
         this.cur.updateSymbol(val);
-        this.pgDefSymbol = val;
+        this.list[1].fz = val;
       },
       deep: true
     },
     poSymbol: {
       handler (val) {
         this.cur.updateSymbol(val);
-        this.poDefSymbol = val;
+        this.list[2].fz = val;
       },
       deep: true
     },
     ptSymbol: {
       handler (val) {
         this.cur.updateSymbol(val);
-        this.ptDefSymbol = val;
+        this.list[3].fz = val;
       },
       deep: true
     }
   },
   mounted () {
     const that = this;
-    this.drawTool = new maptalks.DrawTool({
-      mode: 'LineString',
-      once: true,
-      autoPanAtEdge: true
-    }).addTo(map).disable();
     let i = 0;
-    this.drawTool.on('drawend', function (param) {
+    drawTool.on('drawend', function (param) {
       i++;
-      that.layers.unshift('图层' + i);
+      that.layers.unshift({
+        name: '图层' + i,
+        isShow: true
+      });
       new maptalks.VectorLayer('图层' + i).addTo(map).bringToFront().addGeometry(param.geometry);
       map.resetCursor();
       that.cur = param.geometry;
       param.geometry.setProperties({ 'mode': that.mode });
-      param.geometry.on('dblclick', function () {
-        if (that.cur) {
-          that.cur.endEdit();
-        }
-        that.cur = this;
-        switch (this.getProperties().mode) {
-          case 'pl':
-            this.startEdit({ centerHandleSymbol: 'none' });
-            that.showSet = 'pl';
-            that.plSymbol = this.getSymbol();
-            break;
-          case 'pg':
-            this.startEdit();
-            that.showSet = 'pg';
-            that.pgSymbol = this.getSymbol();
-            break;
-          case 'po':
-            this.startEdit({ vertexHandleSymbol: 'none' });
-            that.showSet = 'po';
-            that.poSymbol = this.getSymbol();
-            break;
-          case 'pt':
-            this.startEdit({ centerHandleSymbol: 'none' });
-            that.showSet = 'pt';
-            that.ptSymbol = this.getSymbol();
-            break;
-          default:
-            break;
+      param.geometry.on('click', function () {
+        if (!drawTool.isEnabled()) {
+          if (that.cur) {
+            that.cur.endEdit();
+          }
+          that.cur = this;
+          switch (this.getProperties().mode) {
+            case 'pl':
+              this.startEdit({ centerHandleSymbol: 'none' });
+              that.showSet = 'pl';
+              that.plSymbol = this.getSymbol();
+              break;
+            case 'pg':
+              this.startEdit();
+              that.showSet = 'pg';
+              that.pgSymbol = this.getSymbol();
+              break;
+            case 'po':
+              this.startEdit({ vertexHandleSymbol: 'none' });
+              that.showSet = 'po';
+              that.poSymbol = this.getSymbol();
+              break;
+            case 'pt':
+              this.startEdit({ centerHandleSymbol: 'none' });
+              that.showSet = 'pt';
+              that.ptSymbol = this.getSymbol();
+              break;
+            default:
+              break;
+          }
         }
       });
     });

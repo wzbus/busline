@@ -52,6 +52,22 @@ button {
 .drawBtn:active {
   background: #eee;
 }
+.redDot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  text-align: center;
+  font-size: 12px;
+  color: #fff;
+  background:red;
+  border-radius: 50%;
+}
+.division {
+  margin-top: 30px;
+}
 .tipBox {
   position: absolute;
   top: 0px;
@@ -175,7 +191,7 @@ button {
   padding: 0 10px;
   background: #f5f3f0;
   border: 1px solid #5298ff;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 .layers_li {
   padding: 5px 0;

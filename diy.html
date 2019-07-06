@@ -12,31 +12,10 @@
   <div id="map"></div>
   <div id="app" v-cloak>
     <ul class="drawBar">
-      <li class="drawItem">
-        <button class="iconfont drawBtn" @click="draw('LineString', 'pl', plDefSymbol)">&#xe617;</button>
+      <li class="drawItem" v-for="(item, index) of list" :key="index">
+        <button class="iconfont drawBtn" @click="draw(item.fx, item.fy, item.fz)">{{item.icon}}</button>
         <div class="tipBox">
-          <div class="tip">添加折线</div>
-          <div class="triangle"></div>
-        </div>
-      </li>
-      <li class="drawItem">
-        <button class="iconfont drawBtn" @click="draw('Polygon', 'pg', pgDefSymbol)">&#xe619;</button>
-        <div class="tipBox">
-          <div class="tip">添加多边形</div>
-          <div class="triangle"></div>
-        </div>
-      </li>
-      <li class="drawItem">
-        <button class="iconfont drawBtn" @click="draw('Point', 'po', poDefSymbol)">&#xe604;</button>
-        <div class="tipBox">
-          <div class="tip">添加图标</div>
-          <div class="triangle"></div>
-        </div>
-      </li>
-      <li class="drawItem">
-        <button class="iconfont drawBtn" @click="draw('Point', 'pt', ptDefSymbol)">&#xe632;</button>
-        <div class="tipBox">
-          <div class="tip">添加文字</div>
+          <div class="tip">{{item.des}}</div>
           <div class="triangle"></div>
         </div>
       </li>
@@ -47,11 +26,23 @@
           <div class="triangle"></div>
         </div>
       </li>
+      <!-- <li class="drawItem division">
+        <div class="redDot" v-show="udo">{{undo}}</div>
+        <button class="iconfont drawBtn" @click="undo">&#xe61f;</button>
+        <div class="tipBox">
+          <div class="tip">撤销</div>
+          <div class="triangle"></div>
+        </div>
+      </li>
+      <li class="drawItem">
+        <div class="redDot" v-show="rdo">{{redo}}</div>
+        <button class="iconfont drawBtn" @click="redo">&#xe61f;</button>
+        <div class="tipBox">
+          <div class="tip">重做</div>
+          <div class="triangle"></div>
+        </div>
+      </li> -->
     </ul>
-    <!-- <ul id="option">
-      <li class="optionItem" @click="undo">撤销</li>
-      <li class="optionItem" @click="redo">重做</li>
-    </ul> -->
     <ul class="container" v-show="showSet==='pl'">
       <li class="banner">路径样式</li>
       <div class="main">
@@ -173,6 +164,7 @@
               <option value="sepia(100%) invert(90%)">暗黑</option>
             </select>
           </div>
+          <button class="btn" @click="save">导出为图片</button>
         </div>
       </div>
     </ul>
@@ -180,12 +172,13 @@
       <div class="banner">图层管理<span class="iconfont closeBtn" @click="closeLayers">&#xe6e9;</span></div>
       <ul class="layers_ul">
         <li class="layers_li" v-for="(item, index) of layers" :key="index">
-          <span class="layers_name">{{item}}</span>
+          <span class="layers_name">{{item.name}}</span>
           <div class="layers_option">
             <span class="iconfont layers_opt" @click="upLayer(index)">&#xe6a9;</span>
             <span class="iconfont layers_opt" @click="downLayer(index)">&#xe6a8;</span>
-            <span class="iconfont layers_opt" @click="showLayer(item)">&#xe6e5;</span>
-            <span class="iconfont layers_opt" @click="removeLayer(item,index)">&#xe6e9;</span>
+            <span class="iconfont layers_opt" @click="hideLayer(index)" v-show="item.isShow">&#xe6e5;</span>
+            <span class="iconfont layers_opt" @click="showLayer(index)" v-show="!item.isShow">&#xe6e4;</span>
+            <span class="iconfont layers_opt" @click="removeLayer(index)">&#xe6e9;</span>
           </div>
         </li>
       </ul>
