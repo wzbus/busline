@@ -189,6 +189,7 @@ new Vue({
     setShape () {
       if (this.shape === 'circle') {
         this.poSymbol = {
+          markerFile: null,
           markerType: 'ellipse',
           markerFill: "#ffffff",
           markerLineColor: '#5298FF',

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <title>公交线路图</title>
+  <link rel="shortcut icon" href="pic/favicon.ico">
+  <link rel="stylesheet" href="css/iconfont.css">
+  <link rel="stylesheet" href="css/map.css">
+  <script type="text/javascript" src="https://api.map.baidu.com/getscript?v=3.0&ak=CrkK1Axboq7E3K93fOE0GHfjII2z8Lwf&s=1"></script>
+</head>
+<body>
+  <div id="map">
+    <p id="domain">wzbus.xyz</p>
+  </div>
+  <ul class="drawBar">
+    <li class="drawItem">
+      <button class="iconfont drawBtn">&#xe617;</button>
+      <div class="container visible">
+        <p class="banner">绘制线路
+          <span class="iconfont closeBtn">&#xe6e9;</span>
+        </p>
+        <div class="main">
+          <div class="subContainer">
+            <div class="opt">
+              <p class="optTitle">线路名</p>
+              <input type="text" value="1" id="busList"
+                onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')"
+                onpaste="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')">
+            </div>
+            <div class="opt">
+              <p class="optTitle">上下行</p>
+              <select id="busListItem">
+                <option value="0">上行</option>
+                <option value="1">下行</option>
+              </select>
+            </div>
+            <div class="opt">
+              <p class="optTitle">颜色</p>
+              <input type="color" id="strokeColor" value="#5298FF">
+            </div>
+            <div class="opt">
+              <p class="optTitle">线宽</p>
+              <input type="number" id="strokeWeight" min="1" max="10" step="1" value="8">
+            </div>
+            <div class="opt">
+              <p class="optTitle">透明度</p>
+              <input type="number" id="strokeOpacity" min="0.1" max="1.0" step="0.1" value="0.8">
+            </div>
+            <div class="opt">
+              <p class="optTitle">线型</p>
+              <select id="strokeStyle">
+                <option value="solid">实线</option>
+                <option value="dashed">虚线</option>
+              </select>
+            </div>
+            <div class="opt">
+              <p class="optTitle">站点</p>
+              <select id="strokeStation">
+                <option value="true">显示</option>
+                <option value="false">不显示</option>
+              </select>
+            </div>
+            <button id="addBtn" class="btn">添加</button>
+            <span class="iconfont question">&#xe609;</span>
+            <div class="tipBox">
+              <div class="tip">可依据自定义样式同时绘制多条公交线路，双击路径可删除线路。</div>
+              <div class="triangle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="drawItem">
+      <button class="iconfont drawBtn">&#xe604;</button>
+      <div class="container">
+        <p class="banner">检索站点
+          <span class="iconfont closeBtn">&#xe6e9;</span>
+        </p>
+        <div class="main">
+          <div class="subContainer">
+            <div class="opt">
+              <p class="optTitle">站名</p>
+              <input type="text" value="八字桥" id="stationList"
+                onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')"
+                onpaste="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')">
+            </div>
+            <div class="opt">
+              <p class="optTitle">颜色</p>
+              <select id="randomColor">
+                <option value="false">默认</option>
+                <option value="true">随机</option>
+              </select>
+            </div>
+            <button id="searchBtn" class="btn">搜索</button>
+            <span class="remark">共<b id="amount"></b>条线路</span>
+            <span class="iconfont question">&#xe609;</span>
+            <div class="tipBox">
+              <div class="tip">由于API限制，站名必须与百度地图能检索得到的站点名称完全一致。</div>
+              <div class="triangle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="drawItem">
+      <button class="iconfont drawBtn">&#xe76c;</button>
+      <div class="container">
+        <p class="banner">功能选项
+          <span class="iconfont closeBtn">&#xe6e9;</span>
+        </p>
+        <div class="main">
+          <div class="subContainer">
+            <div class="opt">
+              <p class="optTitle">风格</p>
+              <select id="mapStyle">
+                <option value="c10f815814efe92503249e060e268f4c">默认</option>
+                <option value="08fe74bc19167c842ae1cfa621be30f7">简化</option>
+                <option value="ac3a07ff1a65b1f2bfa7965a86f82fe5">灰白</option>
+                <option value="0ef8b85d5e6b011d83da7829ac17a041">暗黑</option>
+              </select>
+            </div>
+            <div class="opt">
+              <p class="optTitle">路况</p>
+              <select id="mapLayer">
+                <option value="true">显示</option>
+                <option value="false" selected>不显示</option>
+              </select>
+            </div>
+            <button id="subBtn" class="btn">打开地铁线路图</button>
+            <button id="brtBtn" class="btn">添加所有BRT线路</button>
+            <button id="diyBtn" class="btn">DIY模式</button>
+            <span class="iconfont question">&#xe609;</span>
+            <div class="tipBox">
+              <div class="tip">"添加所有BRT线路"当前只支持直辖市、沿海省份内有BRT的城市。</div>
+              <div class="triangle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="drawItem">
+      <button id="clearBtn" class="iconfont drawBtn drawBtn_red">&#xe6b4;</button>
+    </li>
+  </ul>
+  <div id="subway">
+    <div id="subMap"></div>
+    <div class="searchbox">
+      <div class="search_revert"></div>
+      <div class="search_inputs">
+        <div class="inputbox">
+          <img class="search_icon" src="pic/serach_start_icon.png" alt="起点" />
+          <input type="text" id="start" class="search_input" placeholder="输入起点">
+        </div>
+        <div class="inputbox">
+          <img class="search_icon" src="pic/serach_end_icon.png" alt="终点" />
+          <input type="text" id="end" class="search_input" placeholder="输入终点">
+        </div>
+      </div>
+      <button id="search">搜索</button>
+    </div>
+    <button id="close" class="iconfont">&#xe6e9;</button>
+  </div>
+  <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script type="text/javascript" src="js/map.js"></script>
+  <script type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277659095&web_id=1277659095"></script>
+</body>
+</html>
