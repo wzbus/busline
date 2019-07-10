@@ -293,19 +293,27 @@ jQuery.noConflict();
   });
   $("#brtBtn").click(function () {
     if (!brtlist) {
-      $.getJSON("brt.json", function (res) {
-        if (res[city]) {
-          clear();
-          brtlist = res[city];
-          colorOption = $("#randomColor").val();
-          enableAutoViewport = false;
-          for (let i = 0, len = brtlist.length; i < len; i++) {
-            if ($.inArray(brtlist[i], readyAdd) == -1) {
-              bus.getBusList(brtlist[i]);
+      $.ajax({
+        type: "POST",
+        url: "search.php",
+        data: "city="+city,
+        dataType: "text",
+        success: function (res) {
+          if (res) {
+            brtlist = res;
+            colorOption = $("#randomColor").val();
+            enableAutoViewport = false;
+            for (let i = 0, len = brtlist.length; i < len; i++) {
+              if ($.inArray(brtlist[i], readyAdd) == -1) {
+                bus.getBusList(brtlist[i]);
+              }
             }
+          } else {
+            alert("当前城市无快速公交BRT路线");
           }
-        } else {
-          alert("当前城市无快速公交BRT路线");
+        },
+        error: function () {
+          alert("请求数据库失败")
         }
       });
     } else {
@@ -331,7 +339,8 @@ jQuery.noConflict();
     } else if ($("#mapStyle").val() == "c10f815814efe92503249e060e268f4c") {
       map.addTileLayer(traffic);
     } else {
-      alert("该模式下不支持实时路况，请选择默认底图");
+      alert("该底图下不支持实时路况，请将风格改为默认");
+      $(this).val("false");
     }
   });
   $(".drawBtn").not("#clearBtn").click(function () {

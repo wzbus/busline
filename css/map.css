@@ -275,3 +275,19 @@ button {
     opacity: 1;
   }
 }
+@media screen and (max-width:320px) {
+  .searchbox {
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  .search_inputs {
+    flex: 1;
+  }
+  .search_input {
+    width: auto;
+  }
+  #close {
+    top: 90px;
+  }
+}

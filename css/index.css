@@ -2,11 +2,6 @@
   margin: 0;
   padding: 0;
 }
-html, body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
 a {
   text-decoration: none;
 }
@@ -39,9 +34,7 @@ nav {
   line-height: 24px;
 }
 .left-container {
-  float: left;
   width: 60%;
-  height: calc(100% - 150px);
 }
 .swiper-container {
   width: 90%;
@@ -68,9 +61,7 @@ nav {
   border-left: 4px solid #5298ff;
 }
 .right-container {
-  float: right;
   width: 40%;
-  height: calc(100% - 150px);
   text-align: center;
 }
 .info {
@@ -136,8 +127,58 @@ footer {
   background: #e9e9e9;
   clear: both;
 }
-.beian, .mark {
+.mark {
   margin-left: 30px;
   font-size: 12px;
   color: #999;
+}
+@media screen and (min-width:768px) {
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .left-container, .right-container {
+    height: calc(100% - 150px);
+    float: left;
+  }
+}
+@media screen and (max-width:768px) {
+  .logo {
+    margin: 10px;
+  }
+  .tip {
+    right: 10px;
+  }
+  .title {
+    display: none;
+  }
+  .left-container {
+    width: 100%;
+    height: 320px;
+  }
+  .swiper-container {
+    width: 100%;
+    height: 100%;
+    top: 0;
+  }
+  .swiper-slide {
+    background-position: center;
+  }
+  .right-container {
+    width: 100%;
+  }
+  .info {
+    width: 90%;
+    margin: 15px 5% 0;
+  }
+  .link-btn {
+    margin: 10px auto 0; 
+  }
+  footer {
+    margin-top: 10px;
+  }
+  .mark:not(.feedback) {
+    display: none;
+  }
 }
