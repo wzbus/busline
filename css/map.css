@@ -219,7 +219,7 @@ button {
 .search_revert {
   width: 40px;
   height: 100%;
-  background: url("pic/revert_icon.png") no-repeat;
+  background: url("./pic/revert_icon.png") no-repeat;
   background-position: center;
   cursor: pointer;
 }

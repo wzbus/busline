@@ -50,7 +50,10 @@ button {
   cursor: pointer;
 }
 .drawBtn:active {
-  background: #eee;
+  background: #ddd;
+}
+.disBtn {
+  background: #ddd;
 }
 .redDot {
   position: absolute;
@@ -66,7 +69,7 @@ button {
   border-radius: 50%;
 }
 .division {
-  margin-top: 30px;
+  margin-bottom: 30px;
 }
 .tipBox {
   position: absolute;

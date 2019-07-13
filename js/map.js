@@ -44,7 +44,7 @@ jQuery.noConflict();
   map.addControl(cr);
   cr.addCopyright({
     id: 1,
-    content: "&copy;温州公交吧 | 中华全知道"
+    content: "www.84ditu.com"
   });
   var stationIcon = new BMap.Icon("pic/station_icon.png", new BMap.Size(12, 12));
   var getPolylineOptions = function getPolylineOptions () {
@@ -297,7 +297,7 @@ jQuery.noConflict();
         type: "POST",
         url: "search.php",
         data: "city="+city,
-        dataType: "text",
+        dataType: "json",
         success: function (res) {
           if (res) {
             brtlist = res;

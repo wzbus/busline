@@ -17,7 +17,7 @@ if (url) {
 let map = new maptalks.Map('map', {
   center: mapCenter,
   zoom: 14,
-  minZoom: 1,
+  minZoom: 3,
   maxZoom: 19,
   doubleClickZoom: false,
   spatialReference: {
@@ -26,7 +26,7 @@ let map = new maptalks.Map('map', {
   baseLayer: new maptalks.TileLayer('base', {
     urlTemplate: 'http://online{s}.map.bdimg.com/onlinelabel/?qt=tile&x={x}&y={y}&z={z}&styles=pl&scaler=1&p=1',
     subdomains: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    attribution: '&copy; <a target="_blank" href="http://map.baidu.com">Baidu</a>'
+    attribution: '&copy; <a target="_blank" href="http://map.baidu.com">Baidu</a> <a href="index.html">84ditu.com</a>'
   })
 });
 let drawTool = new maptalks.DrawTool({
@@ -126,6 +126,7 @@ new Vue({
           textSize: 16,
         }
       }],
+      zoomLevel: 14,
       origin: 'baidu',
       style: 'none',
       layer: '',
@@ -152,7 +153,7 @@ new Vue({
         }).setBaseLayer(new maptalks.TileLayer('base', {
           urlTemplate: 'http://online{s}.map.bdimg.com/onlinelabel/?qt=tile&x={x}&y={y}&z={z}&styles=pl&scaler=1&p=1',
           subdomains: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-          attribution: '&copy; <a target="_blank" href="http://map.baidu.com">Baidu</a>',
+          attribution: '&copy; <a target="_blank" href="http://map.baidu.com">Baidu</a> <a href="index.html">84ditu.com</a>',
           cssFilter: this.style
         }));
       } else if (this.origin === 'tianditu') {
@@ -162,7 +163,7 @@ new Vue({
           tileSystem: [1, -1, -180, 90],
           urlTemplate: 'http://t{s}.tianditu.com/DataServer?T=vec_c&x={x}&y={y}&l={z}&tk=de0dc270a51aaca3dd4e64d4f8c81ff6',
           subdomains: ['1', '2', '3', '4', '5'],
-          attribution: '&copy; <a target="_blank" href="http://www.tianditu.cn">Tianditu</a>',
+          attribution: '&copy; <a target="_blank" href="http://www.tianditu.cn">Tianditu</a> <a href="index.html">84ditu.com</a>',
           cssFilter: this.style
         })).addLayer(new maptalks.TileLayer('road', {
           urlTemplate: 'http://t{s}.tianditu.com/DataServer?T=cva_c&x={x}&y={y}&l={z}&tk=de0dc270a51aaca3dd4e64d4f8c81ff6',
@@ -170,6 +171,12 @@ new Vue({
           opacity: 1
         }));
       }
+    },
+    zoomIn() {
+      map.setZoom(++this.zoomLevel);
+    },
+    zoomOut() {
+      map.setZoom(--this.zoomLevel);
     },
     draw (m, n, s) {
       this.mode = n;
@@ -271,9 +278,9 @@ new Vue({
     },
     save () {
       map.toDataURL({
-        mimeType: 'image/jpeg',
+        mimeType: 'image/png',
         save: true,
-        fileName: 'map'
+        fileName: '84ditu_' + Date.now()
       });
     },
     share () {
@@ -314,6 +321,9 @@ new Vue({
   mounted () {
     const that = this;
     let i = 0;
+    map.on('zoomend', function () {
+      that.zoomLevel = map.getZoom();
+    });
     drawTool.on('drawend', function (param) {
       i++;
       that.layers.unshift({

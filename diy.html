@@ -2,7 +2,9 @@
 <html>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-<title>公交线路图 - DIY模式</title>
+<meta name="description" content="基于API的公交线路绘制网站">
+<meta name="keywords" content="线路绘制, 公交线路图, 途经公交, BRT线网">
+<title>巴士地图 - 自定义地图绘制</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
 <link rel="stylesheet" href="css/iconfont.css">
 <link rel="stylesheet" href="css/diy.css">
@@ -12,6 +14,20 @@
   <div id="map"></div>
   <div id="app" v-cloak>
     <ul class="drawBar">
+      <li class="drawItem">
+        <button class="iconfont drawBtn" :class="{'disBtn':zoomLevel>=19}" :disabled="zoomLevel>=19" @click="zoomIn">&#xe767;</button>
+        <div class="tipBox">
+          <div class="tip">放大</div>
+          <div class="triangle"></div>
+        </div>
+      </li>
+      <li class="drawItem division">
+        <button class="iconfont drawBtn" :class="{'disBtn':zoomLevel<=3}" :disabled="zoomLevel<=3" @click="zoomOut">&#xe768;</button>
+        <div class="tipBox">
+          <div class="tip">缩小</div>
+          <div class="triangle"></div>
+        </div>
+      </li>
       <li class="drawItem" v-for="(item, index) of list" :key="index">
         <button class="iconfont drawBtn" @click="draw(item.fx, item.fy, item.fz)">{{item.icon}}</button>
         <div class="tipBox">
@@ -26,22 +42,6 @@
           <div class="triangle"></div>
         </div>
       </li>
-      <!-- <li class="drawItem division">
-        <div class="redDot" v-show="udo">{{undo}}</div>
-        <button class="iconfont drawBtn" @click="undo">&#xe61f;</button>
-        <div class="tipBox">
-          <div class="tip">撤销</div>
-          <div class="triangle"></div>
-        </div>
-      </li>
-      <li class="drawItem">
-        <div class="redDot" v-show="rdo">{{redo}}</div>
-        <button class="iconfont drawBtn" @click="redo">&#xe61f;</button>
-        <div class="tipBox">
-          <div class="tip">重做</div>
-          <div class="triangle"></div>
-        </div>
-      </li> -->
     </ul>
     <ul class="container" v-show="showSet==='pl'">
       <li class="banner">路径样式</li>
@@ -133,6 +133,10 @@
       <li class="banner">文字样式</li>
       <div class="main">
         <div class="subContainer">
+          <div class="opt">
+            <p class="optTitle">内容</p>
+            <input type="text" v-model="ptSymbol.textName">
+          </div>
           <div class="opt">
             <p class="optTitle">颜色</p>
             <input type="color" v-model="ptSymbol.textFill">

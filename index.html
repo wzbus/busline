@@ -3,9 +3,9 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-  <meta name="description" content="基于百度地图JavaScript API V3.0的公交线路绘制网站，可同时绘制多条公交线路">
-  <meta name="keywords" content="线路图绘制, 公交线网, 地图API">
-  <title>公交线路图</title>
+  <meta name="description" content="基于API的公交线路绘制网站">
+  <meta name="keywords" content="线路绘制, 公交线路图, 途经公交, BRT线网">
+  <title>巴士地图</title>
   <link rel="shortcut icon" href="pic/favicon.ico">
   <link rel="stylesheet" href="https://cdn.bootcss.com/Swiper/4.5.0/css/swiper.min.css">
   <link rel="stylesheet" href="css/iconfont.css">
@@ -14,7 +14,10 @@
 <body>
   <nav>
     <img class="logo" src="pic/wzbus.png" alt="logo" />
-    <span class="title">wzbus</span>
+    <div class="title">
+      <p class="name">巴士地图</p>
+      <p class="domain">84ditu.com</p>
+    </div>
     <div class="tip">
       <p>推荐在PC端使用不低于IE9的浏览器访问</p>
       <p>在Chrome等浏览器上如遇地图无法正确显示</p>
@@ -45,21 +48,22 @@
   </div>
   </div>
   <div class="right-container">
-    <p class="info">检索来自百度地图的数据，可实现同时绘制多条公交线路、查询任意站点的公交线网覆盖等功能</p>
+    <p class="desc">检索来自百度地图的数据，可实现同时绘制多条公交线路、查询任意站点的公交线网覆盖等功能</p>
     <a href="map.html" class="link-btn">
       <span class="btn-icon iconfont">&#xe65d;</span>
       <span class="btn-name">公交线路图绘制<span class="arrow-right"></span></span>
     </a>
-    <p class="info">自定义样式，绘制或编辑点、线、面</p>
+    <p class="desc">自定义样式，绘制或编辑点、线、面</p>
     <a href="diy.html" class="link-btn">
       <span class="btn-icon iconfont">&#xe65d;</span>
       <span class="btn-name">自定义地图绘制<span class="arrow-right"></span></span>
     </a>
   </div>
   <footer>
-    <a class="mark" href="#">浙ICP备19023176号</a>
-    <span class="mark iconfont">&#xe680; 温州公交吧 | 中华全知道</span>
-    <span class="mark iconfont">&#xe831; 温州公共交通</span>
+    <span class="mark">浙ICP备19023176号</span>
+    <a href="https://tieba.baidu.com/f?kw=%E6%B8%A9%E5%B7%9E%E5%85%AC%E4%BA%A4" class="mark iconfont">&#xe680; 温州公交吧 | 中华全知道</a>
+    <a href="https://weibo.com/108081088" class="mark iconfont">&#xe831; 温州公共交通</a>
+    <a href="mailto:wzbus@84ditu.com" class="mark iconfont">&#xeb94; wzbus@84ditu.com</a>
     <span class="mark feedback">如有BRT线路疏漏或是建设性的意见，请及时向网站反馈</span>
   </footer>
   <script type="text/javascript" src="https://cdn.bootcss.com/Swiper/4.5.0/js/swiper.min.js"></script>
@@ -74,7 +78,7 @@
       pagination: {
         el: '.swiper-pagination',
         clickable: true
-      },
+      }
     })
   </script>
   <script type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277659095&web_id=1277659095"></script>
