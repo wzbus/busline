@@ -70,6 +70,107 @@ new maptalks.control.Scale({
   metric: true,
   imperial: false
 }).addTo(map);
+let distanceTool = new maptalks.DistanceTool({
+  once: true,
+  symbol: {
+    lineColor: '#c5464a',
+    lineWidth: 3
+  },
+  vertexSymbol: {
+    markerType: 'ellipse',
+    markerFill: '#fff',
+    markerLineColor: '#c5464a',
+    markerLineWidth: 2,
+    markerWidth: 8,
+    markerHeight: 8
+  },
+  labelOptions: {
+    textSymbol: {
+      textFaceName: 'monospace',
+      textFill: '#c5464a',
+      textLineSpacing: 1,
+      textHorizontalAlignment: 'right',
+      textDx: 15,
+      markerLineColor: '#b4b3b3'
+    },
+    boxStyle: {
+      padding: [6, 2],
+      symbol: {
+        markerType: 'square',
+        markerFill: '#fff',
+        markerFillOpacity: 0.9,
+        markerLineColor: '#c5464a'
+      }
+    }
+  },
+  clearButtonSymbol: [{
+    markerType: 'square',
+    markerFill: '#fff',
+    markerLineColor: '#c5464a',
+    markerLineWidth: 2,
+    markerWidth: 15,
+    markerHeight: 15,
+    markerDx: 20
+  }, {
+    markerType: 'x',
+    markerWidth: 10,
+    markerHeight: 10,
+    markerLineColor: '#c5464a',
+    markerDx: 20
+  }],
+  language: 'zh-CN'
+}).addTo(map).disable();
+let areaTool = new maptalks.AreaTool({
+  once: true,
+  symbol: {
+    lineColor: '#c5464a',
+    lineWidth: 1,
+    polygonFill: '#c5464a',
+    polygonOpacity: 0.5
+  },
+  vertexSymbol: {
+    markerType: 'ellipse',
+    markerFill: '#fff',
+    markerLineColor: '#c5464a',
+    markerLineWidth: 2,
+    markerWidth: 8,
+    markerHeight: 8
+  },
+  labelOptions: {
+    textSymbol: {
+      textFaceName: 'monospace',
+      textFill: '#c5464a',
+      textLineSpacing: 1,
+      textHorizontalAlignment: 'right',
+      textDx: 15
+    },
+    boxStyle: {
+      padding: [6, 2],
+      symbol: {
+        markerType: 'square',
+        markerFill: '#fff',
+        markerFillOpacity: 0.9,
+        markerLineColor: '#c5464a'
+      }
+    }
+  },
+  clearButtonSymbol: [{
+    markerType: 'square',
+    markerFill: '#fff',
+    markerLineColor: '#c5464a',
+    markerLineWidth: 2,
+    markerWidth: 15,
+    markerHeight: 15,
+    markerDx: 20
+  }, {
+    markerType: 'x',
+    markerWidth: 10,
+    markerHeight: 10,
+    markerLineColor: '#c5464a',
+    markerDx: 20
+  }],
+  language: 'zh-CN'
+}).addTo(map).disable();
 
 new Vue({
   el: '#app',
@@ -172,13 +273,15 @@ new Vue({
         }));
       }
     },
-    zoomIn() {
+    zoomIn () {
       map.setZoom(++this.zoomLevel);
     },
-    zoomOut() {
+    zoomOut () {
       map.setZoom(--this.zoomLevel);
     },
     draw (m, n, s) {
+      distanceTool.disable();
+      areaTool.disable();
       this.mode = n;
       drawTool.setMode(m).setSymbol(s).enable();
       map.setCursor('crosshair');
@@ -213,12 +316,6 @@ new Vue({
           markerOpacity: 1
         }
       }
-    },
-    undo () {
-      this.cur.undoEdit();
-    },
-    redo () {
-      this.cur.redoEdit();
     },
     closeSet () {
       this.cur.endEdit();
@@ -286,6 +383,16 @@ new Vue({
     share () {
       let mapJson = this.map.toJSON();
       console.log(mapJson);
+    },
+    msDist () {
+      drawTool.disable();
+      areaTool.disable();
+      distanceTool.enable();
+    },
+    msArea () {
+      drawTool.disable();
+      distanceTool.disable();
+      areaTool.enable();
     }
   },
   watch: {
