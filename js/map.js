@@ -44,7 +44,7 @@ jQuery.noConflict();
   map.addControl(cr);
   cr.addCopyright({
     id: 1,
-    content: "www.84ditu.com"
+    content: "<a href='index.html'>www.84ditu.com</a>"
   });
   var stationIcon = new BMap.Icon("pic/station_icon.png", new BMap.Size(12, 12));
   var getPolylineOptions = function getPolylineOptions () {
@@ -79,9 +79,9 @@ jQuery.noConflict();
         lineColor = $("#strokeColor").val();
       }
       polyline = new BMap.Polyline(busline.getPath(), getPolylineOptions());
-      let lineName = busline.name.substring(0, busline.name.indexOf("("));
       map.addOverlay(polyline);
-      readyAdd.push(lineName.substring(0, lineName.length - 1));
+      let lineName = busline.name.substring(0, busline.name.indexOf("("));
+      readyAdd.push(lineName.substring(0, lineName.length - 1).toUpperCase());
       let stationList = [];
       for (let i = 0, len = busline.getNumBusStations(); i < len; i++) {
         let busStation = busline.getBusStation(i);
@@ -167,6 +167,12 @@ jQuery.noConflict();
       return Math.random() - 0.5;
     });
   }
+  function add () {
+    let line = $("#busList").val().replace("路", "").toUpperCase();
+    colorOption = "false";
+    enableAutoViewport = true;
+    addLine(line);
+  }
   function addLine (line) {
     if ($.inArray(line, readyAdd) == -1) {
       bus.getBusList(line);
@@ -174,43 +180,7 @@ jQuery.noConflict();
       alert(line + "路已添加");
     }
   }
-  function clear () {
-    for (let i = 0, len = map.getOverlays().length; i < len; i++) {
-      map.getOverlays()[i].enableMassClear();
-    }
-    map.clearOverlays();
-    readyAdd = [];
-    colorList = [];
-    brtlist = "";
-    $(".remark").hide();
-  }
-  $("#busList").bind("input propertychange", function () {
-    inputLine = $(this).val();
-  });
-  $("#busList").focus(function () {
-    inputLine = $(this).val();
-    $(this).val("");
-  });
-  $("#busList").blur(function () {
-    $(this).val(inputLine);
-  });
-  $("#stationList").bind("input propertychange", function () {
-    inputStation = $(this).val();
-  });
-  $("#stationList").focus(function () {
-    inputStation = $(this).val();
-    $(this).val("");
-  });
-  $("#stationList").blur(function () {
-    $(this).val(inputStation);
-  });
-  $("#addBtn").click(function () {
-    let line = $("#busList").val().replace("路", "");
-    colorOption = "false";
-    enableAutoViewport = true;
-    addLine(line);
-  });
-  $("#searchBtn").click(function () {
+  function search () {
     colorOption = $("#randomColor").val();
     enableAutoViewport = false;
     let local = new BMap.LocalSearch(map, {
@@ -244,6 +214,56 @@ jQuery.noConflict();
     local.search(station, {
       forceLocal: "ture"
     });
+  }
+  function clear () {
+    for (let i = 0, len = map.getOverlays().length; i < len; i++) {
+      map.getOverlays()[i].enableMassClear();
+    }
+    map.clearOverlays();
+    readyAdd = [];
+    colorList = [];
+    brtlist = "";
+    $(".remark").hide();
+  }
+  $("#busList").bind({
+    "input propertychange": function () {
+      inputLine = $(this).val();
+    },
+    "focus": function () {
+      inputLine = $(this).val();
+      $(this).val("");
+    },
+    "blur": function () {
+      $(this).val(inputLine);
+    },
+    "keyup": function () {
+      if ($(this).val() && event.keyCode == "13") {
+        add();
+      }
+    }
+  });
+  $("#stationList").bind({
+    "input propertychange": function () {
+      inputStation = $(this).val();
+    },
+    "focus": function () {
+      inputStation = $(this).val();
+      $(this).val("");
+    },
+    "blur": function () {
+      $(this).val(inputStation);
+    },
+    "keyup": function () {
+      if ($(this).val() && event.keyCode == "13") {
+        search();
+      }
+    }
+  });
+  $("#addBtn").click(function () {
+    add();
+  });
+  $("#searchBtn").click(function () {
+    search();
   });
   $("#subBtn").click(function () {
     if (["贵阳市", "乌鲁木齐市", "温州市", "济南市", "兰州市"].indexOf(city) != -1) {
@@ -313,7 +333,7 @@ jQuery.noConflict();
           }
         },
         error: function () {
-          alert("请求数据库失败")
+          alert("请求数据库失败");
         }
       });
     } else {

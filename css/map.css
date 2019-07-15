@@ -13,6 +13,10 @@ html, body, #map, #subMap {
   font-family: "Microsoft YaHei";
   overflow: hidden;
 }
+a {
+  color: #000 !important;
+  text-decoration: none;
+}
 ul {
   list-style: none;
 }
@@ -219,7 +223,7 @@ button {
 .search_revert {
   width: 40px;
   height: 100%;
-  background: url("./pic/revert_icon.png") no-repeat;
+  background: url("../pic/revert_icon.png") no-repeat;
   background-position: center;
   cursor: pointer;
 }
