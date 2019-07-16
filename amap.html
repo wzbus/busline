@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="基于API的公交线路绘制网站">
+  <meta name="keywords" content="线路绘制, 公交线路图, 途经公交, BRT线网">
+  <title>巴士地图 - 公交线路图绘制</title>
+  <link rel="shortcut icon" href="pic/favicon.ico">
+  <link rel="stylesheet" href="css/iconfont.css">
+  <link rel="stylesheet" href="css/map.css">
+  <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=3993e3ad25c516d9ad02c03937e028e0"></script>
+</head>
+<body>
+  <div id="map">
+    <p id="domain">84ditu.com</p>
+  </div>
+  <ul class="drawBar">
+    <li class="drawItem">
+      <button class="iconfont drawBtn">&#xe617;</button>
+      <div class="container visible">
+        <p class="banner">绘制线路
+          <span class="iconfont closeBtn">&#xe6e9;</span>
+        </p>
+        <div class="main">
+          <div class="subContainer">
+            <div class="opt">
+              <p class="optTitle">线路名</p>
+              <input type="text" value="1" id="busList">
+            </div>
+            <div class="opt">
+              <p class="optTitle">上下行</p>
+              <select id="busListItem">
+                <option value="0">上行</option>
+                <option value="1">下行</option>
+              </select>
+            </div>
+            <div class="opt">
+              <p class="optTitle">颜色</p>
+              <input type="color" id="strokeColor" value="#5298FF">
+            </div>
+            <div class="opt">
+              <p class="optTitle">线宽</p>
+              <input type="number" id="strokeWeight" min="1" max="10" step="1" value="6">
+            </div>
+            <div class="opt">
+              <p class="optTitle">透明度</p>
+              <input type="number" id="strokeOpacity" min="0.1" max="1.0" step="0.1" value="0.8">
+            </div>
+            <div class="opt">
+              <p class="optTitle">线型</p>
+              <select id="strokeStyle">
+                <option value="solid">实线</option>
+                <option value="dashed">虚线</option>
+              </select>
+            </div>
+            <div class="opt">
+              <p class="optTitle">站点</p>
+              <select id="strokeStation">
+                <option value="true">显示</option>
+                <option value="false">不显示</option>
+              </select>
+            </div>
+            <button id="addBtn" class="btn">添加</button>
+            <span class="iconfont question">&#xe609;</span>
+            <div class="tipBox">
+              <div class="tip">可依据样式同时绘制多条公交线路，双击路径可删除线路。</div>
+              <div class="triangle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="drawItem">
+      <button class="iconfont drawBtn">&#xe604;</button>
+      <div class="container">
+        <p class="banner">检索站点
+          <span class="iconfont closeBtn">&#xe6e9;</span>
+        </p>
+        <div class="main">
+          <div class="subContainer">
+            <div class="opt">
+              <p class="optTitle">站名</p>
+              <input type="text" value="八字桥" id="stationList">
+            </div>
+            <div class="opt">
+              <p class="optTitle">颜色</p>
+              <select id="randomColor">
+                <option value="false">默认</option>
+                <option value="true">随机</option>
+              </select>
+            </div>
+            <button id="searchBtn" class="btn">搜索</button>
+            <span class="remark">共<b id="amount"></b>条线路</span>
+            <span class="iconfont question">&#xe609;</span>
+            <div class="tipBox">
+              <div class="tip">由于API限制，站名必须与百度地图能检索得到的站点名称完全一致。</div>
+              <div class="triangle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="drawItem">
+      <button class="iconfont drawBtn">&#xe76c;</button>
+      <div class="container">
+        <p class="banner">功能选项
+          <span class="iconfont closeBtn">&#xe6e9;</span>
+        </p>
+        <div class="main">
+          <div class="subContainer">
+            <div class="opt">
+              <p class="optTitle">风格</p>
+              <select id="mapStyle">
+                <option value="c10f815814efe92503249e060e268f4c">默认</option>
+                <option value="08fe74bc19167c842ae1cfa621be30f7">简化</option>
+                <option value="ac3a07ff1a65b1f2bfa7965a86f82fe5">灰白</option>
+                <option value="0ef8b85d5e6b011d83da7829ac17a041">暗黑</option>
+              </select>
+            </div>
+            <div class="opt">
+              <p class="optTitle">路况</p>
+              <select id="mapLayer">
+                <option value="true">显示</option>
+                <option value="false" selected>不显示</option>
+              </select>
+            </div>
+            <button id="brtBtn" class="btn">添加BRT线路</button>
+            <button id="subBtn" class="btn">查看地铁线路图</button>
+            <button id="diyBtn" class="btn">打开DIY网页</button>
+            <span class="iconfont question">&#xe609;</span>
+            <div class="tipBox">
+              <div class="tip">"添加BRT线路"一键添加当前城市快速公交线路，已支持全国32个拥有BRT的城市。</div>
+              <div class="triangle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="drawItem">
+      <button id="clearBtn" class="iconfont drawBtn drawBtn_red">&#xe6b4;</button>
+    </li>
+  </ul>
+  <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script type="text/javascript" src="js/amap.js"></script>
+  <!-- <script type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277659095&web_id=1277659095"></script> -->
+</body>
+</html>
