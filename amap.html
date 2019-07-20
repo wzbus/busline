@@ -3,9 +3,9 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-  <meta name="description" content="基于API的公交线路绘制网站">
+  <meta name="description" content="基于API的公交线路地图绘制网站">
   <meta name="keywords" content="线路绘制, 公交线路图, 途经公交, BRT线网">
-  <title>巴士地图 - 公交线路图绘制</title>
+  <title>巴士地图网 - 高德/公交线路图绘制</title>
   <link rel="shortcut icon" href="pic/favicon.ico">
   <link rel="stylesheet" href="css/iconfont.css">
   <link rel="stylesheet" href="css/map.css">
@@ -94,7 +94,7 @@
             <span class="remark">共<b id="amount"></b>条线路</span>
             <span class="iconfont question">&#xe609;</span>
             <div class="tipBox">
-              <div class="tip">由于API限制，站名必须与百度地图能检索得到的站点名称完全一致。</div>
+              <div class="tip">若检索到多个站点，请选择要绘制途经公交线网的站点</div>
               <div class="triangle"></div>
             </div>
           </div>
@@ -127,8 +127,8 @@
               </select>
             </div>
             <button id="brtBtn" class="btn">添加BRT线路</button>
-            <button id="subBtn" class="btn">查看地铁线路图</button>
-            <button id="diyBtn" class="btn">打开DIY网页</button>
+            <button id="mapBtn" class="btn"><span class="btn_icon iconfont">&#xe65d;</span>打开百度版线路图</button>
+            <button id="diyBtn" class="btn"><span class="btn_icon iconfont">&#xe65d;</span>打开DIY地图</button>
             <span class="iconfont question">&#xe609;</span>
             <div class="tipBox">
               <div class="tip">"添加BRT线路"一键添加当前城市快速公交线路，已支持全国32个拥有BRT的城市。</div>
@@ -144,6 +144,6 @@
   </ul>
   <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
   <script type="text/javascript" src="js/amap.js"></script>
-  <!-- <script type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277659095&web_id=1277659095"></script> -->
+  <script type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277659095&web_id=1277659095"></script>
 </body>
 </html>

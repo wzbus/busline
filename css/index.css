@@ -75,7 +75,7 @@ nav {
 .desc {
   width: 80%;
   line-height: 24px;
-  margin: 10% 10% 0;
+  margin: 5% 10% 0;
   font-size: 16px;
   color: #333;
 }
@@ -110,6 +110,12 @@ nav {
   box-shadow: 0 3px 0 0 #00ae94;
   background-color: #00cdae;
   display: block;
+}
+.btn-tip {
+  position: absolute;
+  right: 5px;
+  bottom: -3px;
+  font-size: 10px;
 }
 .arrow-right {
   position: absolute;

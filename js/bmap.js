@@ -1,4 +1,3 @@
-"use strict";
 window.onload = function () {
   document.oncontextmenu = function () {
     return false;
@@ -339,6 +338,9 @@ jQuery.noConflict();
     } else {
       alert("已添加BRT路线，请清除所有标识后重试");
     }
+  });
+  $("#mapBtn").click(function () {
+    window.open("amap.html");
   });
   $("#diyBtn").click(function () {
     let poi = map.getCenter();

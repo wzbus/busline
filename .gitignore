@@ -3,4 +3,5 @@
 /pic
 *.json
 *.php
+*.xml
 gulpfile.js

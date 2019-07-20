@@ -51,6 +51,7 @@ button {
   position: absolute;
   top: 60px;
   right: 10px;
+  z-index: 999;
 }
 .drawItem {
   position: relative;
@@ -138,12 +139,17 @@ button {
 .btn {
   margin-top: 10px;
   padding: 5px 10px;
+  font-size: 14px;
   color: #fff;
   background: #5298ff;
   border-radius: 5px;
 }
 .btn:active, #search:active {
   background: #3385ff;
+}
+.btn_icon {
+  font-size: 14px;
+  margin-right: 2px;
 }
 .disable {
   background: #999;
