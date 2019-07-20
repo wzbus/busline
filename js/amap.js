@@ -9,12 +9,13 @@ var map = new AMap.Map("map", {
   isHotspot: false,
   doubleClickZoom: false
 });
-var city, linesearch, stationSearch, readyAdd = [], colorList = [], brtlist, colorOption, lineColor, enableAutoViewport;
+var city, linesearch, stationSearch, readyAdd = [], colorList = [], brtlist, colorOption, lineColor, curColor, enableAutoViewport, isCityList = false;
 AMap.plugin('AMap.CitySearch', function () {
   citySearch = new AMap.CitySearch();
   citySearch.getLocalCity(function (status, result) {
     if (status === 'complete' && result.info === 'OK') {
       city = result.city;
+      $("#curCity").text(city);
       AMap.plugin(["AMap.LineSearch"], function () {
         lineSearch = new AMap.LineSearch({
           city: city,
@@ -33,14 +34,24 @@ AMap.plugin('AMap.CitySearch', function () {
     }
   })
 });
-map.on("moveend", function () {
+map.on("mousedown", function () {
+  $("#cityBox").hide();
+});
+map.on("zoomstart", function () {
+  $("#cityBox").hide();
+});
+map.on("dragend", function () {
   map.getCity(function (res) {
-    city = res.city;
+    city = res.city ? res.city : res.province;
+    $("#curCity").text(city);
+    $("#city_title").text(city);
   });
 });
-map.on("zoomend", function () {
+map.on("touchend", function () {
   map.getCity(function (res) {
-    city = res.city;
+    city = res.city ? res.city : res.province;
+    $("#curCity").text(city);
+    $("#city_title").text(city);
   });
 });
 var traffic = new AMap.TileLayer.Traffic({
@@ -122,6 +133,13 @@ function addLine (line) {
         if (enableAutoViewport) {
           map.setFitView();
         }
+        polyline.on("mouseover", function (e) {
+          curColor = e.target.getOptions().strokeColor;
+          e.target.setOptions({zIndex: 100, strokeColor: "#f36", showDir: true});
+        });
+        polyline.on("mouseout", function (e) {
+          e.target.setOptions({zIndex: 50, strokeColor: curColor, showDir: false});
+        });
         polyline.on("dblclick", function () {
           let marks = map.getAllOverlays();
           for (let i = 0; i < marks.length; i++) {
@@ -149,12 +167,11 @@ function search () {
     if (status === 'complete' && result.info === 'OK') {
       let stationArr = result.stationInfo;
       let searchNum = stationArr.length;
-      map.setFitView();
       if (searchNum) {
         clear();
         enableAutoViewport = false;
         if (searchNum == 1) {
-          passBus(stationArr[0].buslines);
+          passBus(stationArr[0].buslines, stationArr[0].location);
         } else {
           for (let i = 0; i < searchNum; i++) {
             let marker = new AMap.Marker({
@@ -175,7 +192,11 @@ function search () {
             marker.on("mouseover", function (e) {
               e.target.info.open(map, e.target.getPosition());
             });
+            if (i == 0) {
+              marker.info.open(map, stationArr[0].location);
+            }
           }
+          map.setFitView();
         }
       }
     } else {
@@ -188,11 +209,7 @@ function passBus (list, location) {
   for (let i = 0; i < marks.length; i++) {
     marks[i].setMap(null);
   }
-  for (let i = 0, len = list.length; i < len; i++) {
-    let lineName = list[i].name.replace("(停运)", "");
-    lineName = lineName.substring(0, lineName.indexOf("("));
-    addLine(lineName);
-  }
+  map.setCenter([location.lng, location.lat]);
   new AMap.Marker({
     map: map,
     position: [location.lng, location.lat],
@@ -203,6 +220,11 @@ function passBus (list, location) {
     }),
     animation: "AMAP_ANIMATION_DROP"
   });
+  for (let i = 0, len = list.length; i < len; i++) {
+    let lineName = list[i].name.replace("(停运)", "");
+    lineName = lineName.substring(0, lineName.indexOf("("));
+    addLine(lineName);
+  }
   $(".remark").show();
   $("#amount").text(list.length);
 }
@@ -260,6 +282,48 @@ function clear () {
   readyAdd = [];
   $(".remark").hide();
 }
+function chooseCity (cityName) {
+  cityName = cityName.replace(/城区|郊区/, "市")
+  map.setCity(cityName, function (result) {
+    if (result) {
+      map.setZoom(13);
+      city = cityName;
+      $("#curCity").text(city);
+      $("#city_title").text(city);
+      clear();
+    }
+  });
+}
+$("#curCity").click(function () {
+  if (!isCityList) {
+    AMap.plugin('AMap.DistrictSearch', function () {
+      var districtSearch = new AMap.DistrictSearch({
+        level: 'country',
+        subdistrict: 2
+      })
+      districtSearch.search('中国', function (status, result) {
+        if (status === 'complete' && result.info === 'OK') {
+          let domList = "";
+          let provinces = result.districtList[0].districtList;
+          for (let i = provinces.length - 1; i >= 0; i--) {
+            if (provinces[i].name !== "台湾省") {
+              domList += "<dt>" + provinces[i].name.replace(/省|市|自治区|特别行政区|壮族|回族|维吾尔/g, "") + "</dt><dd>";
+              let cities = provinces[i].districtList;
+              for (let j = 0, len = cities.length; j < len; j++) {
+                domList += "<li onclick='chooseCity(" + JSON.stringify(cities[j].name) + ")'>" + cities[j].name + "</li>";
+              }
+              domList += "</dd>";
+            }
+          }
+          domList += "<dt>台湾</dt><dd><li>暂无数据</li></dd>";
+          $("#cityList").html(domList);
+        }
+      });
+    });
+    isCityList = true;
+  }
+  $("#cityBox").slideToggle();
+});
 $("#brtBtn").click(function () {
   if (!brtlist) {
     $.ajax({
