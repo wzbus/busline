@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=320, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0,shrink-to-fit=no" />
+  <title>巴士地图网 - 地铁线路图</title>
+  <link rel="shortcut icon" href="pic/favicon.ico">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    .curCity {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      line-height: 26px;
+      padding: 0 10px;
+      font-size: 12px;
+      border: 1px solid #eee;
+      background: #fff;
+      z-index: 1000;
+    }
+    .cityBox {
+      position: absolute;
+      top: 50px;
+      left: 10px;
+      width: 200px;
+      padding: 5px 15px;
+      background: #fff;
+      box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.2), 0 2px 6px 0 rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      display: none;
+    }
+    .cityBox li {
+      float: left;
+      line-height: 20px;
+      margin-right: 9px;
+      color: #999;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .cityBox li:hover {
+      color: #5298ff;
+    }
+  </style>
+</head>
+<body>
+  <div id="subway"></div>
+  <div id="curCity" class="curCity">城市</div>
+  <ul id="cityBox" class="cityBox"></ul>
+  <script type="text/javascript" src="https://webapi.amap.com/subway?v=1.0&key=3993e3ad25c516d9ad02c03937e028e0&callback=cbk"></script>
+  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    var subway, adcode = 1100, isCityList = false;
+    let url = location.search;
+    if (url) {
+      adcode = url.replace("?", "");
+    }
+    window.cbk = function () {
+      subway = subway("subway", {
+        adcode: adcode,
+        theme: "colorful"
+      });
+      subway.event.on("station.touch", function (e, info) {
+        let id = info.id;
+        subway.stopAnimation();
+        subway.addInfoWindow(id, {});
+        let center = subway.getStCenter(id);
+        subway.setCenter(center);
+      });
+      subway.event.on("lineName.touch", function (e, info) {
+        subway.showLine(info.id);
+        let center = subway.getSelectedLineCenter();
+        subway.setCenter(center);
+      });
+      subway.event.on("subway.touch", function () {
+        subway.clearInfoWindow();
+      });
+      subway.event.on("startStation.touch", function (e, info) {
+        subway.stopAnimation();
+        subway.clearInfoWindow();
+        subway.setStart(info.id, {});
+        startInfo = info;
+        route();
+      });
+      subway.event.on("endStation.touch", function (e, info) {
+        subway.stopAnimation();
+        subway.clearInfoWindow();
+        subway.setEnd(info.id, {});
+        endInfo = info;
+        route();
+      });
+      let startInfo = {}, endInfo = {};
+      function route() {
+        if (startInfo.id && endInfo.id) {
+          subway.route(startInfo.id, endInfo.id, {});
+          startInfo = {};
+          endInfo = {};
+        }
+      }
+    }
+    document.getElementById("subway").addEventListener("wheel", zoom);
+    document.getElementById("subway").addEventListener("DOMMouseScroll", zoom);
+    function zoom (e) {
+      let zoomIn;
+      if (e.wheelDelta) {
+        zoomIn = e.wheelDelta > 0 ? true : false;
+      } else {
+        zoomIn = e.detail < 0 ? true : false;
+      }
+      if (zoomIn) {
+        subway.scale(1.3);
+      } else {
+        subway.scale(0.4);
+      }
+    }
+    $("#curCity").click(function () {
+      if (!isCityList) {
+        subway.getCityList(function (res) {
+          let arr = [], domList = "";
+          for (let i in res) {
+            arr.push({
+              city: res[i].name,
+              code: i
+            });
+          }
+          for (let i = 0, len = arr.length; i < len; i++) {
+            domList += "<li onclick='chooseCity(" + JSON.stringify(arr[i].city) + "," + arr[i].code + ")'>" + arr[i].city + "</li>";
+          }
+          domList += "<li onclick='chooseTw()'>台北</li><li onclick='chooseTw()'>高雄</li>";
+          $("#cityBox").html(domList);
+        });
+        isCityList = true;
+      }
+      $("#cityBox").slideToggle();
+    });
+    function chooseCity(city, code) {
+      subway.setAdcode(code);
+      $("#curCity").text(city);
+      $("#cityBox").hide();
+      history.replaceState(null, null, `metro.html?${code}`);
+    }
+    function chooseTw() {
+      $("#cityBox").hide();
+      alert("高德地图暂无台湾省数据，如需查看请到本站百度版地图中查看");
+    }
+  </script>
+  <script type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277659095&web_id=1277659095"></script>
+</body>
+</html>
