@@ -56,7 +56,7 @@
   <script type="text/javascript" src="https://webapi.amap.com/subway?v=1.0&key=3993e3ad25c516d9ad02c03937e028e0&callback=cbk"></script>
   <script type="text/javascript" src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
   <script type="text/javascript">
-    var subway, adcode = 1100, isCityList = false;
+    var subway, adcode = 1100, level = 1.0, isCityList = false;
     let url = location.search;
     if (url) {
       adcode = url.replace("?", "");
@@ -66,6 +66,7 @@
         adcode: adcode,
         theme: "colorful"
       });
+      subway.scale(1.0);
       subway.event.on("station.touch", function (e, info) {
         let id = info.id;
         subway.stopAnimation();
@@ -113,10 +114,14 @@
       } else {
         zoomIn = e.detail < 0 ? true : false;
       }
-      if (zoomIn) {
-        subway.scale(1.3);
+      if (zoomIn && level < 1.3) {
+        level = (level * 10 + 0.1 * 10) / 10;
+        subway.scale(level);
+      } else if (!zoomIn && level > 0.3) { 
+        level = (level * 10 - 0.1 * 10) / 10;  
+        subway.scale(level);
       } else {
-        subway.scale(0.4);
+        return false;
       }
     }
     $("#curCity").click(function () {
@@ -141,6 +146,7 @@
     });
     function chooseCity(city, code) {
       subway.setAdcode(code);
+      level = 1.0;
       $("#curCity").text(city);
       $("#cityBox").hide();
       history.replaceState(null, null, `metro.html?${code}`);

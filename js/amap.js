@@ -9,7 +9,7 @@ var map = new AMap.Map("map", {
   isHotspot: false,
   doubleClickZoom: false
 });
-var city, linesearch, stationSearch, readyAdd = [], colorList = [], brtlist, colorOption, lineColor, curColor, enableAutoViewport, isCityList = false;
+var city, linesearch, stationSearch, ruler, readyAdd = [], colorList = [], brtlist, colorOption, lineColor, curColor, enableAutoViewport, isCityList = false;
 AMap.plugin('AMap.CitySearch', function () {
   citySearch = new AMap.CitySearch();
   citySearch.getLocalCity(function (status, result) {
@@ -49,9 +49,9 @@ var traffic = new AMap.TileLayer.Traffic({
   'autoRefresh': true,
   'interval': 180,
 });
-map.on("zoomend", change());
-map.on("dragend", change());
-map.on("touchend", change());
+map.on("zoomend", change);
+map.on("dragend", change);
+map.on("touchend", change);
 function change () {
   map.getCity(function (res) {
     city = res.city ? res.city : res.province;
@@ -291,49 +291,46 @@ function clear () {
   brtlist = "";
   $(".remark").hide();
 }
-function chooseCity (cityName) {
-  map.off("zoomend", change());
-  cityName = cityName.replace(/城区|郊区/, "市")
-  map.setCity(cityName, function (res) {
+function chooseCity (adcode) {
+  map.setCity(adcode, function (res) {
     if (res) {
-      $("#cityBox").hide();
-      $("#curCity").text(city);
-      $("#city_title").text(city);
       clear();
-      map.on("zoomend", change());
+      $("#cityBox").hide();
+      map.setZoom(13);
     }
   });
-  city = cityName;
 }
 $("#curCity").click(function () {
   if (!isCityList) {
-    AMap.plugin('AMap.DistrictSearch', function () {
-      var districtSearch = new AMap.DistrictSearch({
-        level: 'country',
-        subdistrict: 2
-      })
-      districtSearch.search('中国', function (status, result) {
-        if (status === 'complete' && result.info === 'OK') {
-          let domList = "";
-          let provinces = result.districtList[0].districtList;
-          for (let i = provinces.length - 1; i >= 0; i--) {
-            if (provinces[i].name !== "台湾省") {
-              domList += "<dt>" + provinces[i].name.replace(/省|市|自治区|特别行政区|壮族|回族|维吾尔/g, "") + "</dt><dd>";
-              let cities = provinces[i].districtList;
-              for (let j = 0, len = cities.length; j < len; j++) {
-                domList += "<li onclick='chooseCity(" + JSON.stringify(cities[j].name) + ")'>" + cities[j].name + "</li>";
-              }
-              domList += "</dd>";
-            }
+    $.getJSON("city.json", function (res) {
+      if (res) {
+        let domList = "";
+        for (let i = 0, len = res.length; i < len; i++) {
+          domList += `<dt>${res[i].province}</dt><dd>`;
+          let cities = res[i].city;
+          for (let j = 0, len = cities.length; j < len; j++) {
+            domList += `<li onclick='chooseCity(${cities[j].adcode})'>${cities[j].name}</li>`;
           }
-          domList += "<dt>台湾</dt><dd><li>暂无数据</li></dd>";
-          $("#cityList").html(domList);
+          domList += "</dd>";
         }
-      });
+        $("#cityList").html(domList);
+      }
     });
-    isCityList = true;
   }
   $("#cityBox").slideToggle();
+});
+$("#ruleBtn").click(function () {
+  if (!ruler) {
+    map.plugin(["AMap.RangingTool"], function () {
+      ruler = new AMap.RangingTool(map);
+      ruler.on("end", function () {
+        ruler.turnOff();
+      });
+      ruler.turnOn();
+    });
+  } else {
+    ruler.turnOn();
+  }
 });
 $("#brtBtn").click(function () {
   if (!brtlist) {
