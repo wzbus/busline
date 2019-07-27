@@ -4,7 +4,7 @@ window.onload = function () {
   }
 };
 var subway, city, inputLine, inputStation, lineOpacity, lineColor, colorOption, currentPolyline, polyline, brtlist,
-  readyAdd = [], num = [], colorList = [], enableAutoViewport;
+  readyAdd = [], num = [], enableAutoViewport;
 $("#search").click(function () {
   let start = $("#start").val();
   let end = $("#end").val();
@@ -65,15 +65,7 @@ jQuery.noConflict();
     },
     onGetBusLineComplete: function onGetBusLineComplete (busline) {
       if (colorOption == "true") {
-        randomColor();
-        let color = `rgb(${num[0]},${num[1]},${num[2]})`;
-        num = [];
-        if ($.inArray(color, colorList) == -1) {
-          colorList.push(color);
-          lineColor = color;
-        } else {
-          randomColor();
-        }
+        lineColor = randomColor();
       } else {
         lineColor = $("#strokeColor").val();
       }
@@ -158,13 +150,14 @@ jQuery.noConflict();
     }
   }
   function randomColor () {
-    let arr1 = ["0", "51", "102", "153", "204"];
-    let arr2 = arr1.sort(() => {
+    let arr1 = [0, 51, 102, 153, 204].sort(() => {
       return Math.random() - 0.5;
     });
-    num = arr2.splice(0, 2).concat("255").sort(() => {
+    let arr2 = arr1.splice(0, 2).concat(255).sort(() => {
       return Math.random() - 0.5;
     });
+    let color = `rgb(${arr2[0] + Math.round(Math.random() * 30)}, ${arr2[1] + Math.round(Math.random() * 30)}, ${arr2[2] + Math.round(Math.random() * 30)})`;
+    return color
   }
   function add () {
     let line = $("#busList").val().replace("路", "").toUpperCase();
@@ -220,7 +213,6 @@ jQuery.noConflict();
     }
     map.clearOverlays();
     readyAdd = [];
-    colorList = [];
     brtlist = "";
     $(".remark").hide();
   }
@@ -339,8 +331,8 @@ jQuery.noConflict();
       alert("已添加BRT路线，请清除所有标识后重试");
     }
   });
-  $("#mapBtn").click(function () {
-    window.open("amap.html");
+  $("#backBtn").click(function () {
+    window.open("index.html");
   });
   $("#diyBtn").click(function () {
     let poi = map.getCenter();

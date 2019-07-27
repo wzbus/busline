@@ -9,7 +9,7 @@ var map = new AMap.Map("map", {
   isHotspot: false,
   doubleClickZoom: false
 });
-var city, linesearch, stationSearch, ruler, readyAdd = [], colorList = [], brtlist, colorOption, lineColor, curColor, enableAutoViewport, isCityList = false;
+var city, linesearch, stationSearch, ruler, readyAdd = [], brtlist, colorOption, lineColor, curColor, enableAutoViewport, isCityList = false;
 AMap.plugin('AMap.CitySearch', function () {
   citySearch = new AMap.CitySearch();
   citySearch.getLocalCity(function (status, result) {
@@ -79,15 +79,7 @@ function addLine (line) {
         let pathArr = lineArr.path;
         let stops = lineArr.via_stops;
         if (colorOption == "true") {
-          randomColor();
-          let color = `rgb(${num[0]},${num[1]},${num[2]})`;
-          num = [];
-          if ($.inArray(color, colorList) == -1) {
-            colorList.push(color);
-            lineColor = color;
-          } else {
-            randomColor();
-          }
+          lineColor = randomColor();
         } else {
           lineColor = $("#strokeColor").val();
         }
@@ -155,11 +147,11 @@ function addLine (line) {
           }
         });
       } else {
-        alert("未检索到\"" + line + "\"，请确认有此线路数据后再试");
+        alert(`未检索到"${line}"，请确认有此线路数据后再试`);
       }
     });
   } else {
-    alert(line + "已添加");
+    alert(`${line}已添加`);
   }
 }
 function search () {
@@ -202,7 +194,7 @@ function search () {
         }
       }
     } else {
-      alert("未检索到\"" + $("#stationList").val() + "\"，请确认有此站点数据后再试");
+      alert(`未检索到"${$("#stationList").val()}"，请确认有此站点数据后再试`);
     }
   });
 }
@@ -277,13 +269,14 @@ $("#searchBtn").click(function () {
   search();
 });
 function randomColor () {
-  let arr1 = ["0", "51", "102", "153", "204"];
-  let arr2 = arr1.sort(() => {
+  let arr1 = [0, 51, 102, 153, 204].sort(() => {
     return Math.random() - 0.5;
   });
-  num = arr2.splice(0, 2).concat("255").sort(() => {
+  let arr2 = arr1.splice(0, 2).concat(255).sort(() => {
     return Math.random() - 0.5;
   });
+  let color = `rgb(${arr2[0] + Math.round(Math.random() * 30)}, ${arr2[1] + Math.round(Math.random() * 30)}, ${arr2[2] + Math.round(Math.random() * 30)})`;
+  return color
 }
 function clear () {
   map.clearMap();
@@ -365,8 +358,11 @@ $("#brtBtn").click(function () {
 $("#clearBtn").click(function () {
   clear();
 });
+$("#subBtn").click(function () {
+  window.open("metro.html");
+});
 $("#backBtn").click(function () {
-  window.open("amap.html");
+  window.open("index.html");
 });
 $("#diyBtn").click(function () {
   let poi = map.getCenter();
