@@ -304,12 +304,43 @@ button {
 .cityBox::-webkit-scrollbar {
   display: none;
 }
-.city_title {
+.city_header {
   line-height: 32px;
   font-size: 14px;
   font-weight: 700;
   color: #666;
   border-bottom: 1px solid #ccc;
+}
+.city_title {
+  max-width: 80px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  vertical-align: middle;
+  display: inline-block;
+}
+.defBtn {
+  margin: 0 5px;
+  font-size: 12px;
+  color: #999;
+  background: transparent;
+}
+.defBtn:active {
+  color: #666;
+}
+.searchBox {
+  float: right;
+  line-height: 24px;
+  margin: 3px 15px 3px 0;
+  border: 1px solid #eee;
+}
+.searchBox input {
+  width: 90px;
+  border: none;
+}
+.searchBox button {
+  margin: 0 5px;
+  background: transparent;
 }
 .cityBox dl {
   margin-top: 10px;

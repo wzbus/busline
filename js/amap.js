@@ -12,13 +12,22 @@ var map = new AMap.Map("map", {
 var city, linesearch, stationSearch, ruler, readyAdd = [], brtlist, colorOption, lineColor, curColor, enableAutoViewport, isCityList = false;
 AMap.plugin('AMap.CitySearch', function () {
   citySearch = new AMap.CitySearch();
-  citySearch.getLocalCity(function (status, result) {
-    if (status === 'complete' && result.info === 'OK') {
+  let defCity = localStorage.getItem("defCity");
+  if (defCity && !location.search) {
+    map.setCity(defCity, function() {
+      city = defCity;
+      map.setZoom(13);
       $(".container:first").show();
-      city = result.city;
-      $("#curCity").text(city);
-    }
-  })
+    });
+  } else {
+    citySearch.getLocalCity(function (status, result) {
+      if (status === 'complete' && result.info === 'OK') {
+        $(".container:first").show();
+        city = result.city;
+        $("#curCity").text(city);
+      }
+    });
+  }
 });
 AMap.plugin(["AMap.LineSearch"], function () {
   lineSearch = new AMap.LineSearch({
@@ -316,6 +325,7 @@ function chooseCity (adcode) {
 }
 $("#curCity").click(function () {
   if (!isCityList) {
+    $("#city_title").text(city);
     $.getJSON("city.json", function (res) {
       if (res) {
         let domList = "";
@@ -375,6 +385,19 @@ $("#brtBtn").click(function () {
   } else {
     alert("已添加BRT路线，请清除所有标识后重试");
   }
+});
+$("#cityBtn").click(function () {
+  let cityName = $("#cityName").val();
+  if (cityName) {
+    map.setCity(cityName, function() {
+      $("#cityBox").hide();
+      $("#cityName").val("");
+      map.setZoom(13);
+    });
+  }
+});
+$("#defBtn").click(function () {
+  localStorage.setItem("defCity", city);
 });
 $("#clearBtn").click(function () {
   clear();

@@ -143,14 +143,19 @@
   </ul>
   <div id="curCity" class="curCity">全国</div>
   <div id="cityBox" class="cityBox">
-    <p class="city_title">当前城市：
-      <span id="city_title"></span>
+    <div class="city_header">当前城市：
+      <span id="city_title" class="city_title"></span>
       <span class="iconfont closeBtn">&#xe6e9;</span>
-    </p>
+      <button id="defBtn" class="defBtn">设为默认</button>
+      <div class="searchBox">
+        <button id="cityBtn" class="iconfont">&#xe741;</button>
+        <input type="text" id="cityName" placeholder="请输入城市">
+      </div>
+    </div>
     <dl id="cityList"></dl>
   </div>
   <script type="text/javascript" src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
   <script type="text/javascript" src="js/amap.js"></script>
-  <!-- <script type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277659095&web_id=1277659095"></script> -->
+  <script type="text/javascript" src="https://s96.cnzz.com/z_stat.php?id=1277659095&web_id=1277659095"></script>
 </body>
 </html>
