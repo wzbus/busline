@@ -29,6 +29,34 @@ select {
 input[type="number"] {
   direction: rtl;
 }
+input[type="checkbox"] {
+  display: none;
+}
+label {
+  position: relative;
+  font-size: 12px;
+  color: #333;
+}
+label i {
+  width: 12px;
+  height: 12px;
+  margin: 0 5px;
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 2px;
+  vertical-align: -1px;
+  display: inline-block;
+}
+label i::after {
+  position: absolute;
+  content: "\2713";
+  top: 0;
+  left: 5px;
+  color: #fff;
+}
+label input:checked + i {
+  background: #5298ff;
+}
 button {
   border: 0;
   cursor: pointer;

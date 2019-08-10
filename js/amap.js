@@ -52,7 +52,10 @@ AMap.plugin(["AMap.StationSearch"], function () {
         map.getCity(function (res) {
           city = res.city ? res.city : res.province;
           lineSearch.setCity(city);
+          stationSearch.setCity(city);
           passBus(station);
+          $("#curCity").text(city);
+          $("#city_title").text(city);
         });
       } else {
         history.replaceState(null, null, "amap.html");
@@ -84,7 +87,7 @@ function add () {
   history.replaceState(null, null, "amap.html");
 }
 function addLine (line) {
-  if ($.inArray(line, readyAdd) == -1) {
+  if ($.inArray(line, readyAdd) == -1 || $("#repeat").prop("checked")) {
     lineSearch.search(line, function (status, result) {
       if (status === 'complete' && result.info === 'OK') {
         let direction = $("#busListItem").val();
@@ -130,13 +133,12 @@ function addLine (line) {
               clickable: true,
               extData: lineName
             });
-            marker.info = new AMap.InfoWindow({
-              content: "<p>" + stops[i].name + `</p><p>${name}</p><p style='font-size: 12px;color: #666;'>全程${distance}公里</p>`,
-              offset: new AMap.Pixel(-1, 0),
-              closeWhenClickMap: true
-            });
-            marker.on("click", function (e) {
-              e.target.info.open(map, poi);
+            marker.on("click", function () {
+              new AMap.InfoWindow({
+                content: `<p>${stops[i].name}</p><p>${name}</p><p style="font-size: 12px;color: #666;">全程${distance}公里</p>`,
+                offset: new AMap.Pixel(-1, 0),
+                closeWhenClickMap: true
+              }).open(map, poi);
             });
           }
         }
@@ -196,7 +198,7 @@ function search () {
                 title: stationArr[i].name
               });
               marker.info = new AMap.InfoWindow({
-                content: "<p>" + stationArr[i].name + "</p><button onclick='passBus(" + JSON.stringify(stationArr[i]) + ")' style='background:transparent;text-decoration:underline;color:#5298ff;'>选择此站点绘制途经公交线网</button>",
+                content: `<p>${stationArr[i].name}</p><button onclick="passBus(${JSON.stringify(stationArr[i])})" style="background:transparent;text-decoration:underline;color:#5298ff;">选择此站点绘制途经公交线网</button>`,
                 offset: new AMap.Pixel(4, -32),
                 closeWhenClickMap: true
               });
@@ -302,10 +304,11 @@ function randomColor () {
   let arr1 = [0, 51, 102, 153, 204].sort(() => {
     return Math.random() - 0.5;
   });
-  let arr2 = arr1.splice(0, 2).concat(255).sort(() => {
+  let arr2 = [arr1[0] + Math.round(Math.random() * 20), arr1[1] + Math.round(Math.random() * 20)].concat(255);
+  let arr3 = arr2.sort(() => {
     return Math.random() - 0.5;
   });
-  let color = `rgb(${arr2[0] + Math.round(Math.random() * 30)}, ${arr2[1] + Math.round(Math.random() * 30)}, ${arr2[2] + Math.round(Math.random() * 30)})`;
+  let color = `rgb(${arr3.join()})`;
   return color
 }
 function clear () {
@@ -325,7 +328,6 @@ function chooseCity (adcode) {
 }
 $("#curCity").click(function () {
   if (!isCityList) {
-    $("#city_title").text(city);
     $.getJSON("city.json", function (res) {
       if (res) {
         let domList = "";
@@ -369,7 +371,7 @@ $("#brtBtn").click(function () {
           colorOption = $("#randomColor").val();
           enableAutoViewport = false;
           for (let i = 0, len = brtlist.length; i < len; i++) {
-            if ($.inArray(brtlist[i], readyAdd) == -1) {
+            if ($.inArray(brtlist[i], readyAdd) == -1 || $("#repeat").prop("checked")) {
               addLine(brtlist[i]);
             }
           }
