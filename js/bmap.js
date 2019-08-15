@@ -153,10 +153,11 @@ jQuery.noConflict();
     let arr1 = [0, 51, 102, 153, 204].sort(() => {
       return Math.random() - 0.5;
     });
-    let arr2 = arr1.splice(0, 2).concat(255).sort(() => {
+    let arr2 = [arr1[0] + Math.round(Math.random() * 20), arr1[1] + Math.round(Math.random() * 20)].concat(255);
+    let arr3 = arr2.sort(() => {
       return Math.random() - 0.5;
     });
-    let color = `rgb(${arr2[0] + Math.round(Math.random() * 30)}, ${arr2[1] + Math.round(Math.random() * 30)}, ${arr2[2] + Math.round(Math.random() * 30)})`;
+    let color = `rgb(${arr3.join()})`;
     return color
   }
   function add () {
@@ -166,7 +167,7 @@ jQuery.noConflict();
     addLine(line);
   }
   function addLine (line) {
-    if ($.inArray(line, readyAdd) == -1) {
+    if ($.inArray(line, readyAdd) == -1 || $("#repeat").prop("checked")) {
       bus.getBusList(line);
     } else {
       alert(line + "路已添加");
@@ -315,7 +316,7 @@ jQuery.noConflict();
             colorOption = $("#randomColor").val();
             enableAutoViewport = false;
             for (let i = 0, len = brtlist.length; i < len; i++) {
-              if ($.inArray(brtlist[i], readyAdd) == -1) {
+              if ($.inArray(brtlist[i], readyAdd) == -1 || $("#repeat").prop("checked")) {
                 bus.getBusList(brtlist[i]);
               }
             }

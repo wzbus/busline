@@ -53,7 +53,7 @@ AMap.plugin(["AMap.StationSearch"], function () {
           city = res.city ? res.city : res.province;
           lineSearch.setCity(city);
           stationSearch.setCity(city);
-          passBus(station);
+          chooseStation(station);
           $("#curCity").text(city);
           $("#city_title").text(city);
         });
@@ -134,11 +134,13 @@ function addLine (line) {
               extData: lineName
             });
             marker.on("click", function () {
-              new AMap.InfoWindow({
-                content: `<p>${stops[i].name}</p><p>${name}</p><p style="font-size: 12px;color: #666;">全程${distance}公里</p>`,
-                offset: new AMap.Pixel(-1, 0),
-                closeWhenClickMap: true
-              }).open(map, poi);
+              passBus(stops[i].id).then(function(res) { 
+                new AMap.InfoWindow({
+                  content: `<p>${stops[i].name}<span class="info_dis">全程${distance}公里</span></p><p>${name}</p><p class="info_lines">途经公交:${res}</p>`,
+                  offset: new AMap.Pixel(-1, 0),
+                  closeWhenClickMap: true
+                }).open(map, poi);
+              });
             });
           }
         }
@@ -184,7 +186,7 @@ function search () {
           clear();
           enableAutoViewport = false;
           if (searchNum == 1) {
-            passBus(stationArr[0]);
+            chooseStation(stationArr[0]);
           } else {
             for (let i = 0; i < searchNum; i++) {
               let marker = new AMap.Marker({
@@ -198,7 +200,7 @@ function search () {
                 title: stationArr[i].name
               });
               marker.info = new AMap.InfoWindow({
-                content: `<p>${stationArr[i].name}</p><button onclick="passBus(${JSON.stringify(stationArr[i])})" style="background:transparent;text-decoration:underline;color:#5298ff;">选择此站点绘制途经公交线网</button>`,
+                content: `<p>${stationArr[i].name}</p><button onclick="chooseStation(${JSON.stringify(stationArr[i])})" class="info_btn">选择此站点绘制途经公交线网</button>`,
                 offset: new AMap.Pixel(4, -32),
                 closeWhenClickMap: true
               });
@@ -220,7 +222,26 @@ function search () {
     }
   });
 }
-function passBus (station) {
+function passBus(id) {
+  return new Promise(function(resolve, reject) {
+    stationSearch.searchById(id, function (status, result) {
+      if (status === 'complete' && result.info === 'OK') {
+        let buslines = result.stationInfo[0].buslines;
+        let str = "", arr =[];
+        for (let i = 0, len = buslines.length; i < len; i++) {
+          let lineName = buslines[i].name.replace("(停运)", "");
+          lineName = lineName.substring(0, lineName.indexOf("("));
+          if ($.inArray(lineName, arr) == -1) {
+            str = str + lineName + ",";
+            arr.push(lineName);
+          }
+        }
+        resolve(str.substring(0, str.length - 1));
+      }
+    });
+  });
+}
+function chooseStation (station) {
   let marks = map.getAllOverlays("marker");
   for (let i = 0; i < marks.length; i++) {
     marks[i].setMap(null);
