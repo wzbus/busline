@@ -1,15 +1,15 @@
-window.onload = function () {
+$(function () {
   document.oncontextmenu = function () {
     return false;
   }
-};
+});
 var map = new AMap.Map("map", {
   zoom: 13,
   resizeEnable: true,
   isHotspot: false,
   doubleClickZoom: false
 });
-var city, linesearch, stationSearch, ruler, readyAdd = [], brtlist, colorOption, lineColor, curColor, enableAutoViewport, isCityList = false;
+var city, linesearch, stationSearch, ruler, readyAdd = [], brtlist, curColor, enableAutoViewport, isCityList = false;
 AMap.plugin('AMap.CitySearch', function () {
   citySearch = new AMap.CitySearch();
   let defCity = localStorage.getItem("defCity");
@@ -81,12 +81,10 @@ function change () {
 }
 function add () {
   let line = $("#busList").val().toUpperCase() + "路";
-  colorOption = "false";
-  enableAutoViewport = true;
   addLine(line);
   history.replaceState(null, null, "amap.html");
 }
-function addLine (line) {
+function addLine (line, defaultColor = $("#strokeColor").val()) {
   if ($.inArray(line, readyAdd) == -1 || $("#repeat").prop("checked")) {
     lineSearch.search(line, function (status, result) {
       if (status === 'complete' && result.info === 'OK') {
@@ -97,11 +95,7 @@ function addLine (line) {
         let distance = parseFloat(lineArr.distance).toFixed(1);
         let pathArr = lineArr.path;
         let stops = lineArr.via_stops;
-        if (colorOption == "true") {
-          lineColor = randomColor();
-        } else {
-          lineColor = $("#strokeColor").val();
-        }
+        let lineColor = defaultColor ? defaultColor : randomColor();
         let polyline = new AMap.Polyline({
           map: map,
           path: pathArr,
@@ -149,7 +143,7 @@ function addLine (line) {
         }
         polyline.on("mouseover", function (e) {
           curColor = e.target.getOptions().strokeColor;
-          e.target.setOptions({ zIndex: 100, strokeColor: "#f36", showDir: true });
+          e.target.setOptions({ zIndex: 100, strokeColor: "#F33", showDir: true });
         });
         polyline.on("mouseout", function (e) {
           e.target.setOptions({ zIndex: 50, strokeColor: curColor, showDir: false });
@@ -175,7 +169,6 @@ function addLine (line) {
   }
 }
 function search () {
-  colorOption = $("#randomColor").val();
   stationSearch.search($("#stationList").val(), function (status, result) {
     if (status === 'complete' && result.info === 'OK') {
       let searchArr = result.stationInfo;
@@ -200,7 +193,7 @@ function search () {
                 title: stationArr[i].name
               });
               marker.info = new AMap.InfoWindow({
-                content: `<p>${stationArr[i].name}</p><button onclick="chooseStation(${JSON.stringify(stationArr[i])})" class="info_btn">选择此站点绘制途经公交线网</button>`,
+                content: `<p>${stationArr[i].name}</p><button onclick='chooseStation(${JSON.stringify(stationArr[i])})' class="info_btn">选择此站点绘制途经公交线网</button>`,
                 offset: new AMap.Pixel(4, -32),
                 closeWhenClickMap: true
               });
@@ -265,7 +258,7 @@ function chooseStation (station) {
     if ($.inArray(lineName, arr) == -1) {
       list = list + lineName + ",";
       arr.push(lineName);
-      addLine(lineName);
+      $("#randomColor").val() === "false" ? addLine(lineName) : addLine(lineName, false);
     }
   }
   list = list.substring(0, list.length - 1);
@@ -389,11 +382,10 @@ $("#brtBtn").click(function () {
       success: function (res) {
         if (res) {
           brtlist = res;
-          colorOption = $("#randomColor").val();
           enableAutoViewport = false;
           for (let i = 0, len = brtlist.length; i < len; i++) {
             if ($.inArray(brtlist[i], readyAdd) == -1 || $("#repeat").prop("checked")) {
-              addLine(brtlist[i]);
+              $("#randomColor").val() === "false" ? addLine(lineName) : addLine(lineName, false);
             }
           }
           history.replaceState(null, null, "amap.html");
