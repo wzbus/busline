@@ -50,8 +50,7 @@ jQuery.noConflict();
     return {
       strokeColor: lineColor,
       strokeWeight: $("#strokeWeight").val(),
-      strokeOpacity: $("#strokeOpacity").val(),
-      strokeStyle: $("#strokeStyle").val()
+      strokeOpacity: $("#strokeOpacity").val()
     }
   };
   var bus = new BMap.BusLineSearch(map, {
@@ -74,7 +73,7 @@ jQuery.noConflict();
       let lineName = busline.name.substring(0, busline.name.indexOf("("));
       readyAdd.push(lineName.substring(0, lineName.length - 1).toUpperCase());
       let stationList = [];
-      for (let i = 0, len = busline.getNumBusStations(); i < len; i++) {
+      for (let i = 0; i < busline.getNumBusStations(); i++) {
         let busStation = busline.getBusStation(i);
         let marker = new BMap.Marker(busStation.position, {
           icon: stationIcon
@@ -100,7 +99,7 @@ jQuery.noConflict();
       }
       polyline.addEventListener("dblclick", function (e) {
         let allOverlay = map.getOverlays();
-        for (let i = 0, len = allOverlay.length; i < len; i++) {
+        for (let i = 0; i < allOverlay.length; i++) {
           if (allOverlay[i].toString() == "[object Marker]") {
             if (allOverlay[i].getTitle().substr(0, allOverlay[i].getTitle().indexOf(":")) == lineName) {
               allOverlay[i].enableMassClear();
@@ -194,7 +193,7 @@ jQuery.noConflict();
             let passBus = local.getResults().getPoi(0).address.split(";");
             $(".remark").show();
             $("#amount").text(passBus.length);
-            for (let i = 0, len = passBus.length; i < len; i++) {
+            for (let i = 0; i < passBus.length; i++) {
               addLine(passBus[i]);
             }
           } else {
@@ -209,7 +208,7 @@ jQuery.noConflict();
     });
   }
   function clear () {
-    for (let i = 0, len = map.getOverlays().length; i < len; i++) {
+    for (let i = 0; i < map.getOverlays().length; i++) {
       map.getOverlays()[i].enableMassClear();
     }
     map.clearOverlays();
@@ -266,7 +265,7 @@ jQuery.noConflict();
           let list = BMapSub.SubwayCitiesList;
           let subwaycity;
           let cityname = city.replace("市", "");
-          for (let i = 0, len = list.length; i < len; i++) {
+          for (let i = 0; i < list.length; i++) {
             if (list[i].name == cityname) {
               subwaycity = list[i];
               break;
@@ -307,7 +306,7 @@ jQuery.noConflict();
     if (!brtlist) {
       $.ajax({
         type: "POST",
-        url: "search.php",
+        url: "api/search.php",
         data: "city="+city,
         dataType: "json",
         success: function (res) {
@@ -315,7 +314,7 @@ jQuery.noConflict();
             brtlist = res;
             colorOption = $("#randomColor").val();
             enableAutoViewport = false;
-            for (let i = 0, len = brtlist.length; i < len; i++) {
+            for (let i = 0; i < brtlist.length; i++) {
               if ($.inArray(brtlist[i], readyAdd) == -1 || $("#repeat").prop("checked")) {
                 bus.getBusList(brtlist[i]);
               }

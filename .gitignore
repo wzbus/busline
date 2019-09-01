@@ -1,6 +1,6 @@
-/node_modules
-/dist
-/pic
-*.json
-*.php
-*.xml
+node_modules
+dist
+rev
+app/api
+app/pic
+sitemap.xml

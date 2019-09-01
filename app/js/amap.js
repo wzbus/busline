@@ -9,7 +9,7 @@ var map = new AMap.Map("map", {
   isHotspot: false,
   doubleClickZoom: false
 });
-var city, linesearch, stationSearch, ruler, readyAdd = [], brtlist, curColor, enableAutoViewport, isCityList = false;
+var city, linesearch, stationSearch, readyAdd = [], brtlist, curColor, enableAutoViewport, isCityList = false;
 AMap.plugin('AMap.CitySearch', function () {
   citySearch = new AMap.CitySearch();
   let defCity = localStorage.getItem("defCity");
@@ -81,6 +81,7 @@ function change () {
 }
 function add () {
   let line = $("#busList").val().toUpperCase() + "路";
+  enableAutoViewport = true;
   addLine(line);
   history.replaceState(null, null, "amap.html");
 }
@@ -102,7 +103,6 @@ function addLine (line, defaultColor = $("#strokeColor").val()) {
           strokeColor: lineColor,
           strokeOpacity: $("#strokeOpacity").val(),
           strokeWeight: $("#strokeWeight").val(),
-          strokeStyle: $("#strokeStyle").val(),
           strokeDasharray: [25, 10],
           lineJoin: "round",
           lineCap: "round",
@@ -111,7 +111,7 @@ function addLine (line, defaultColor = $("#strokeColor").val()) {
         });
         readyAdd.push(lineName);
         if ($("#strokeStation").val() == "true") {
-          for (let i = 0, len = lineArr.via_stops.length; i < len; i++) {
+          for (let i = 0; i < lineArr.via_stops.length; i++) {
             let poi = stops[i].location;
             let marker = new AMap.CircleMarker({
               map: map,
@@ -220,8 +220,8 @@ function passBus(id) {
     stationSearch.searchById(id, function (status, result) {
       if (status === 'complete' && result.info === 'OK') {
         let buslines = result.stationInfo[0].buslines;
-        let str = "", arr =[];
-        for (let i = 0, len = buslines.length; i < len; i++) {
+        let str = "", arr = [];
+        for (let i = 0; i < buslines.length; i++) {
           let lineName = buslines[i].name.replace("(停运)", "");
           lineName = lineName.substring(0, lineName.indexOf("("));
           if ($.inArray(lineName, arr) == -1) {
@@ -252,7 +252,7 @@ function chooseStation (station) {
     animation: "AMAP_ANIMATION_DROP"
   });
   let list = "", arr = [];
-  for (let i = 0, len = station.buslines.length; i < len; i++) {
+  for (let i = 0; i < station.buslines.length; i++) {
     let lineName = station.buslines[i].name.replace("(停运)", "");
     lineName = lineName.substring(0, lineName.indexOf("("));
     if ($.inArray(lineName, arr) == -1) {
@@ -327,7 +327,7 @@ function randomColor () {
 }
 function clear () {
   map.clearMap();
-  readyAdd = [];
+  readyAdd.length = 0;
   brtlist = "";
   $(".remark").hide();
 }
@@ -342,13 +342,13 @@ function chooseCity (adcode) {
 }
 $("#curCity").click(function () {
   if (!isCityList) {
-    $.getJSON("city.json", function (res) {
+    $.getJSON("api/city.json", function (res) {
       if (res) {
         let domList = "";
-        for (let i = 0, len = res.length; i < len; i++) {
+        for (let i = 0; i < res.length; i++) {
           domList += `<dt>${res[i].province}</dt><dd>`;
           let cities = res[i].city;
-          for (let j = 0, len = cities.length; j < len; j++) {
+          for (let j = 0; j < cities.length; j++) {
             domList += `<li onclick='chooseCity(${cities[j].adcode})'>${cities[j].name}</li>`;
           }
           domList += "</dd>";
@@ -362,7 +362,7 @@ $("#curCity").click(function () {
 $("#ruleBtn").click(function () {
   if (!ruler) {
     map.plugin(["AMap.RangingTool"], function () {
-      ruler = new AMap.RangingTool(map);
+      var ruler = new AMap.RangingTool(map);
       ruler.on("end", function () {
         ruler.turnOff();
       });
@@ -376,16 +376,16 @@ $("#brtBtn").click(function () {
   if (!brtlist) {
     $.ajax({
       type: "POST",
-      url: "search.php",
+      url: "api/search.php",
       data: "city=" + city,
       dataType: "json",
       success: function (res) {
         if (res) {
           brtlist = res;
           enableAutoViewport = false;
-          for (let i = 0, len = brtlist.length; i < len; i++) {
+          for (let i = 0; i < brtlist.length; i++) {
             if ($.inArray(brtlist[i], readyAdd) == -1 || $("#repeat").prop("checked")) {
-              $("#randomColor").val() === "false" ? addLine(lineName) : addLine(lineName, false);
+              $("#randomColor").val() === "false" ? addLine(brtlist[i]) : addLine(brtlist[i], false);
             }
           }
           history.replaceState(null, null, "amap.html");
@@ -407,6 +407,7 @@ $("#cityBtn").click(function () {
     map.setCity(cityName, function() {
       $("#cityBox").hide();
       $("#cityName").val("");
+      clear();
       map.setZoom(13);
     });
   }
