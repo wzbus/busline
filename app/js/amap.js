@@ -2,19 +2,31 @@ $(function () {
   document.oncontextmenu = function () {
     return false;
   }
+  String.prototype.delBrace = function () {
+    let str = this.toString();
+    if (str.indexOf("(") > 0) {
+      return str.substring(0, str.indexOf("("));
+    } else {
+      return str
+    }
+  }
 });
+var city, linesearch, stationSearch, placeSearch, readyAdd = [], brtlist, curColor, curCood, ruler, enableAutoViewport, isCityList = false, style = localStorage.getItem("style");
 var map = new AMap.Map("map", {
   zoom: 13,
   resizeEnable: true,
   isHotspot: false,
-  doubleClickZoom: false
+  doubleClickZoom: false,
+  mapStyle: `amap://styles/${style}`
 });
-var city, linesearch, stationSearch, readyAdd = [], brtlist, curColor, enableAutoViewport, isCityList = false;
+var contextMenu = new AMap.ContextMenu({
+  content: '<ul class="menu"><li onclick="disNearStation()">附近公交站</li><li onclick="measure()">测距工具</li></ul>'
+});
 AMap.plugin('AMap.CitySearch', function () {
   citySearch = new AMap.CitySearch();
   let defCity = localStorage.getItem("defCity");
   if (defCity && !location.search) {
-    map.setCity(defCity, function() {
+    map.setCity(defCity, function () {
       city = defCity;
       map.setZoom(13);
       $(".container:first").show();
@@ -63,13 +75,29 @@ AMap.plugin(["AMap.StationSearch"], function () {
     })
   }
 });
+AMap.service(["AMap.PlaceSearch"], function () {
+  placeSearch = new AMap.PlaceSearch({
+    type: "公共设施",
+    city: city,
+    citylimit: true,
+    extensions: "all",
+    autoFitView: true
+  });
+});
 var traffic = new AMap.TileLayer.Traffic({
-  'autoRefresh': true,
-  'interval': 180,
+  autoRefresh: true,
+  interval: 180,
 });
 map.on("zoomend", change);
 map.on("dragend", change);
 map.on("touchend", change);
+map.on("rightclick", function (e) {
+  curCood = e.lnglat;
+  contextMenu.open(map, e.lnglat);
+});
+if (style) {
+  $("#mapStyle").val(style);
+}
 function change () {
   map.getCity(function (res) {
     city = res.city ? res.city : res.province;
@@ -92,7 +120,7 @@ function addLine (line, defaultColor = $("#strokeColor").val()) {
         let direction = $("#busListItem").val();
         let lineArr = result.lineInfo[direction];
         let name = lineArr.name;
-        let lineName = name.substring(0, name.indexOf("("));
+        let lineName = name.delBrace();
         let distance = parseFloat(lineArr.distance).toFixed(1);
         let pathArr = lineArr.path;
         let stops = lineArr.via_stops;
@@ -128,7 +156,7 @@ function addLine (line, defaultColor = $("#strokeColor").val()) {
               extData: lineName
             });
             marker.on("click", function () {
-              passBus(stops[i].id).then(function(res) { 
+              passBus(stops[i].id).then(function (res) {
                 new AMap.InfoWindow({
                   content: `<p>${stops[i].name}<span class="info_dis">全程${distance}公里</span></p><p>${name}</p><p class="info_lines">途经公交:${res}</p>`,
                   offset: new AMap.Pixel(-1, 0),
@@ -215,15 +243,14 @@ function search () {
     }
   });
 }
-function passBus(id) {
-  return new Promise(function(resolve, reject) {
+function passBus (id) {
+  return new Promise(function (resolve, reject) {
     stationSearch.searchById(id, function (status, result) {
       if (status === 'complete' && result.info === 'OK') {
         let buslines = result.stationInfo[0].buslines;
         let str = "", arr = [];
         for (let i = 0; i < buslines.length; i++) {
-          let lineName = buslines[i].name.replace("(停运)", "");
-          lineName = lineName.substring(0, lineName.indexOf("("));
+          let lineName = buslines[i].name.replace("(停运)", "").delBrace();
           if ($.inArray(lineName, arr) == -1) {
             str = str + lineName + ",";
             arr.push(lineName);
@@ -235,10 +262,7 @@ function passBus(id) {
   });
 }
 function chooseStation (station) {
-  let marks = map.getAllOverlays("marker");
-  for (let i = 0; i < marks.length; i++) {
-    marks[i].setMap(null);
-  }
+  clear();
   let center = [station.location.lng, station.location.lat];
   map.setCenter(center);
   let marker = new AMap.Marker({
@@ -253,8 +277,7 @@ function chooseStation (station) {
   });
   let list = "", arr = [];
   for (let i = 0; i < station.buslines.length; i++) {
-    let lineName = station.buslines[i].name.replace("(停运)", "");
-    lineName = lineName.substring(0, lineName.indexOf("("));
+    let lineName = station.buslines[i].name.replace("(停运)", "").delBrace();
     if ($.inArray(lineName, arr) == -1) {
       list = list + lineName + ",";
       arr.push(lineName);
@@ -273,6 +296,88 @@ function chooseStation (station) {
   $(".remark").show();
   $("#amount").text(arr.length);
   history.replaceState(null, null, `amap.html?${station.id}`);
+}
+function chooseNearStation (station) {
+  clear();
+  let center = [station.location.lng, station.location.lat];
+  map.setCenter(center);
+  let marker = new AMap.Marker({
+    map: map,
+    position: center,
+    icon: new AMap.Icon({
+      image: "pic/marker.png",
+      size: new AMap.Size(25, 35),
+      imageSize: new AMap.Size(25, 35)
+    }),
+    animation: "AMAP_ANIMATION_DROP"
+  });
+  let str = station.address;
+  let buslines = str.split(";");
+  let list = "", arr = [];
+  for (let i = 0; i < buslines.length; i++) {
+    let lineName = buslines[i].replace("(停运)", "").delBrace();
+    if ($.inArray(lineName, arr) == -1) {
+      list = list + lineName + ",";
+      arr.push(lineName);
+      $("#randomColor").val() === "false" ? addLine(lineName) : addLine(lineName, false);
+    }
+  }
+  list = list.substring(0, list.length - 1);
+  marker.info = new AMap.InfoWindow({
+    content: `<p>${station.name}</p><p style="font-size:14px">途经公交:${list}</p>`,
+    offset: new AMap.Pixel(4, -32),
+    closeWhenClickMap: true
+  });
+  marker.on("click", function (e) {
+    e.target.info.open(map, e.target.getPosition());
+  });
+  history.replaceState(null, null, `amap.html?${station.id}`);
+}
+function disNearStation () {
+  clear();
+  new AMap.Circle({
+    center: curCood,
+    radius: 500,
+    strokeColor: "#5298ff",
+    strokeWeight: 2,
+    strokeOpacity: 0.5,
+    fillColor: "#5298ff",
+    fillOpacity: 0.5
+  }).setMap(map);
+  placeSearch.searchNearBy('公交站', curCood, 500, function (status, result) {
+    if (status === 'complete' && result.info === 'OK') {
+      let stationArr = result.poiList.pois;
+      let searchNum = stationArr.length;
+      enableAutoViewport = false;
+      for (let i = 0; i < searchNum; i++) {
+        let marker = new AMap.Marker({
+          map: map,
+          position: stationArr[i].location,
+          icon: new AMap.Icon({
+            image: "pic/marker.png",
+            size: new AMap.Size(25, 35),
+            imageSize: new AMap.Size(25, 35)
+          }),
+          title: stationArr[i].name
+        });
+        marker.info = new AMap.InfoWindow({
+          content: `<p>${stationArr[i].name}</p><button onclick='chooseNearStation(${JSON.stringify(stationArr[i])})' class="info_btn">选择此站点绘制途经公交线网</button>`,
+          offset: new AMap.Pixel(4, -32),
+          closeWhenClickMap: true
+        });
+        marker.on("mouseover", function (e) {
+          e.target.info.open(map, e.target.getPosition());
+        });
+        if (i == 0) {
+          marker.info.open(map, stationArr[0].location);
+        }
+      }
+      map.setFitView();
+    } else {
+      contextMenu.close();
+      alert("附近500米内无公交站点");
+    }
+  });
 }
 $("#busList").bind({
   "input propertychange": function () {
@@ -340,6 +445,20 @@ function chooseCity (adcode) {
     }
   });
 }
+function measure () {
+  contextMenu.close();
+  if (!ruler) {
+    map.plugin(["AMap.RangingTool"], function () {
+      ruler = new AMap.RangingTool(map);
+      ruler.turnOn();
+      ruler.on("end", function () {
+        ruler.turnOff();
+      });
+    });
+  } else {
+    ruler.turnOn();
+  }
+}
 $("#curCity").click(function () {
   if (!isCityList) {
     $.getJSON("api/city.json", function (res) {
@@ -358,19 +477,6 @@ $("#curCity").click(function () {
     });
   }
   $("#cityBox").slideToggle();
-});
-$("#ruleBtn").click(function () {
-  if (!ruler) {
-    map.plugin(["AMap.RangingTool"], function () {
-      var ruler = new AMap.RangingTool(map);
-      ruler.on("end", function () {
-        ruler.turnOff();
-      });
-      ruler.turnOn();
-    });
-  } else {
-    ruler.turnOn();
-  }
 });
 $("#brtBtn").click(function () {
   if (!brtlist) {
@@ -404,7 +510,7 @@ $("#brtBtn").click(function () {
 $("#cityBtn").click(function () {
   let cityName = $("#cityName").val();
   if (cityName) {
-    map.setCity(cityName, function() {
+    map.setCity(cityName, function () {
       $("#cityBox").hide();
       $("#cityName").val("");
       clear();
@@ -430,6 +536,7 @@ $("#diyBtn").click(function () {
 });
 $("#mapStyle").change(function () {
   map.setMapStyle('amap://styles/' + $(this).val());
+  localStorage.setItem("style", $(this).val());
 });
 $("#mapLayer").change(function () {
   if ($(this).val() == "false") {

@@ -54,7 +54,7 @@ gulp.task('font', function () {
 });
 
 gulp.task('api', function () {
-  return gulp.src('app/api/**/*')
+  return gulp.src('app/api/*')
     .pipe(cached('api'))
     .pipe(gulp.dest('dist/api'));
 });
@@ -94,6 +94,6 @@ gulp.task('connect', function () {
   });
 });
 
-gulp.task('default', gulp.series('clear', gulp.parallel('css', 'js', 'pic', 'font'), 'html'));
+gulp.task('default', gulp.series('clear', gulp.parallel('css', 'js', 'pic', 'font', 'api'), 'html'));
 
 gulp.task('server', gulp.series('default', gulp.parallel('connect', 'watch')));
