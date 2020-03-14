@@ -30,6 +30,7 @@ AMap.plugin('AMap.CitySearch', function () {
       city = defCity;
       map.setZoom(13);
       $(".container:first").show();
+      initPlugins();
     });
   } else {
     citySearch.getLocalCity(function (status, result) {
@@ -37,53 +38,56 @@ AMap.plugin('AMap.CitySearch', function () {
         $(".container:first").show();
         city = result.city;
         $("#curCity").text(city);
+        initPlugins();
       }
     });
   }
 });
-AMap.plugin(["AMap.LineSearch"], function () {
-  lineSearch = new AMap.LineSearch({
-    city: city,
-    pageIndex: 1,
-    pageSize: 2,
-    extensions: 'all'
+function initPlugins () {
+  AMap.plugin(["AMap.LineSearch"], function () {
+    lineSearch = new AMap.LineSearch({
+      city: city,
+      pageIndex: 1,
+      pageSize: 2,
+      extensions: 'all'
+    });
   });
-});
-AMap.plugin(["AMap.StationSearch"], function () {
-  stationSearch = new AMap.StationSearch({
-    city: city,
-    pageIndex: 1,
-    pageSize: 10
+  AMap.plugin(["AMap.StationSearch"], function () {
+    stationSearch = new AMap.StationSearch({
+      city: city,
+      pageIndex: 1,
+      pageSize: 10
+    });
+    let url = location.search;
+    if (url) {
+      stationSearch.searchById(url.replace("?", ""), function (status, result) {
+        if (status === 'complete' && result.info === 'OK') {
+          let station = result.stationInfo[0];
+          map.panTo([station.location.lng, station.location.lat]);
+          map.getCity(function (res) {
+            city = res.city ? res.city : res.province;
+            lineSearch.setCity(city);
+            stationSearch.setCity(city);
+            chooseStation(station);
+            $("#curCity").text(city);
+            $("#city_title").text(city);
+          });
+        } else {
+          history.replaceState(null, null, "amap.html");
+        }
+      });
+    }
   });
-  let url = location.search;
-  if (url) {
-    stationSearch.searchById(url.replace("?", ""), function (status, result) {
-      if (status === 'complete' && result.info === 'OK') {
-        let station = result.stationInfo[0];
-        map.panTo([station.location.lng, station.location.lat]);
-        map.getCity(function (res) {
-          city = res.city ? res.city : res.province;
-          lineSearch.setCity(city);
-          stationSearch.setCity(city);
-          chooseStation(station);
-          $("#curCity").text(city);
-          $("#city_title").text(city);
-        });
-      } else {
-        history.replaceState(null, null, "amap.html");
-      }
-    })
-  }
-});
-AMap.service(["AMap.PlaceSearch"], function () {
-  placeSearch = new AMap.PlaceSearch({
-    type: "公共设施",
-    city: city,
-    citylimit: true,
-    extensions: "all",
-    autoFitView: true
+  AMap.service(["AMap.PlaceSearch"], function () {
+    placeSearch = new AMap.PlaceSearch({
+      type: "公共设施",
+      city: city,
+      citylimit: true,
+      extensions: "all",
+      autoFitView: true
+    });
   });
-});
+}
 var traffic = new AMap.TileLayer.Traffic({
   autoRefresh: true,
   interval: 180,
@@ -113,7 +117,7 @@ function add () {
   addLine(line);
   history.replaceState(null, null, "amap.html");
 }
-function addLine (line, defaultColor = $("#strokeColor").val()) {
+function addLine (line, lineColor = $("#strokeColor").val()) {
   if ($.inArray(line, readyAdd) == -1 || $("#repeat").prop("checked")) {
     lineSearch.search(line, function (status, result) {
       if (status === 'complete' && result.info === 'OK') {
@@ -124,7 +128,6 @@ function addLine (line, defaultColor = $("#strokeColor").val()) {
         let distance = parseFloat(lineArr.distance).toFixed(1);
         let pathArr = lineArr.path;
         let stops = lineArr.via_stops;
-        let lineColor = defaultColor ? defaultColor : randomColor();
         let polyline = new AMap.Polyline({
           map: map,
           path: pathArr,
@@ -275,13 +278,15 @@ function chooseStation (station) {
     }),
     animation: "AMAP_ANIMATION_DROP"
   });
-  let list = "", arr = [];
-  for (let i = 0; i < station.buslines.length; i++) {
+  let list = "", arr = [], len = station.buslines.length, colors;
+  let isRandomColor = $("#randomColor").val() === "true";
+  isRandomColor && (colors = createColor(len));
+  for (let i = 0; i < len; i++) {
     let lineName = station.buslines[i].name.replace("(停运)", "").delBrace();
     if ($.inArray(lineName, arr) == -1) {
       list = list + lineName + ",";
       arr.push(lineName);
-      $("#randomColor").val() === "false" ? addLine(lineName) : addLine(lineName, false);
+      isRandomColor ? addLine(lineName, colors[i]) : addLine(lineName);
     }
   }
   list = list.substring(0, list.length - 1);
@@ -313,13 +318,15 @@ function chooseNearStation (station) {
   });
   let str = station.address;
   let buslines = str.split(";");
-  let list = "", arr = [];
-  for (let i = 0; i < buslines.length; i++) {
+  let list = "", arr = [], len = buslines.length, colors;
+  let isRandomColor = $("#randomColor").val() === "true";
+  isRandomColor && (colors = createColor(len));
+  for (let i = 0; i < len; i++) {
     let lineName = buslines[i].replace("(停运)", "").delBrace();
     if ($.inArray(lineName, arr) == -1) {
       list = list + lineName + ",";
       arr.push(lineName);
-      $("#randomColor").val() === "false" ? addLine(lineName) : addLine(lineName, false);
+      isRandomColor ? addLine(lineName, colors[i]) : addLine(lineName);
     }
   }
   list = list.substring(0, list.length - 1);
@@ -419,16 +426,11 @@ $("#addBtn").click(function () {
 $("#searchBtn").click(function () {
   search();
 });
-function randomColor () {
-  let arr1 = [0, 51, 102, 153, 204].sort(() => {
-    return Math.random() - 0.5;
-  });
-  let arr2 = [arr1[0] + Math.round(Math.random() * 20), arr1[1] + Math.round(Math.random() * 20)].concat(255);
-  let arr3 = arr2.sort(() => {
-    return Math.random() - 0.5;
-  });
-  let color = `rgb(${arr3.join()})`;
-  return color
+function createColor (count) {
+  return randomColor({
+    luminosity: 'blight',
+    count
+  })
 }
 function clear () {
   map.clearMap();
@@ -489,9 +491,12 @@ $("#brtBtn").click(function () {
         if (res) {
           brtlist = res;
           enableAutoViewport = false;
-          for (let i = 0; i < brtlist.length; i++) {
+          let len = brtlist.length, colors;
+          let isRandomColor = $("#randomColor").val() === "true";
+          isRandomColor && (colors = createColor(len));
+          for (let i = 0; i < len; i++) {
             if ($.inArray(brtlist[i], readyAdd) == -1 || $("#repeat").prop("checked")) {
-              $("#randomColor").val() === "false" ? addLine(brtlist[i]) : addLine(brtlist[i], false);
+              isRandomColor ? addLine(brtlist[i], colors[i]) : addLine(brtlist[i]);
             }
           }
           history.replaceState(null, null, "amap.html");
