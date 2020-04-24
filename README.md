@@ -1,9 +1,9 @@
 # busline
 基于API的公交线路地图绘制网站
 
-[![](https://img.shields.io/badge/Version-3.3-brightgreen.svg)](https://www.wzbus.xyz)
+[![](https://img.shields.io/badge/Version-3.4-brightgreen.svg)](https://www.wzbus.xyz)
 [![](https://img.shields.io/badge/BMap_JSAPI-3.0-blue.svg)](http://lbsyun.baidu.com/index.php?title=jspopular3.0)
-[![](https://img.shields.io/badge/AMap_JSAPI-1.4-blue.svg)](https://lbs.amap.com/api/javascript-api/summary)
+[![](https://img.shields.io/badge/AMap_JSAPI-2.0-blue.svg)](https://lbs.amap.com/api/javascript-api/summary)
 [![](https://img.shields.io/badge/JQuery-3.4.1-blue.svg)](https://jquery.com/)
 
 ![demo](https://github.com/wzbus/busline/blob/master/demo.jpg)

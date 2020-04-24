@@ -11,7 +11,7 @@ $(function () {
     }
   }
 });
-var city, linesearch, stationSearch, placeSearch, readyAdd = [], brtlist, curColor, curCood, ruler, enableAutoViewport, isCityList = false, style = localStorage.getItem("style");
+var city, readyAdd = [], brtlist, curColor, ruler, isCityList = false, style = localStorage.getItem("style");
 var map = new AMap.Map("map", {
   zoom: 13,
   resizeEnable: true,
@@ -19,13 +19,10 @@ var map = new AMap.Map("map", {
   doubleClickZoom: false,
   mapStyle: `amap://styles/${style}`
 });
-var contextMenu = new AMap.ContextMenu({
-  content: '<ul class="menu"><li onclick="disNearStation()">附近公交站</li><li onclick="measure()">测距工具</li></ul>'
-});
 AMap.plugin('AMap.CitySearch', function () {
   citySearch = new AMap.CitySearch();
   let defCity = localStorage.getItem("defCity");
-  if (defCity && !location.search) {
+  if (defCity) {
     map.setCity(defCity, function () {
       city = defCity;
       map.setZoom(13);
@@ -46,7 +43,7 @@ AMap.plugin('AMap.CitySearch', function () {
 function initPlugins () {
   AMap.plugin(["AMap.LineSearch"], function () {
     lineSearch = new AMap.LineSearch({
-      city: city,
+      city,
       pageIndex: 1,
       pageSize: 2,
       extensions: 'all'
@@ -54,7 +51,7 @@ function initPlugins () {
   });
   AMap.plugin(["AMap.StationSearch"], function () {
     stationSearch = new AMap.StationSearch({
-      city: city,
+      city,
       pageIndex: 1,
       pageSize: 10
     });
@@ -64,28 +61,30 @@ function initPlugins () {
         if (status === 'complete' && result.info === 'OK') {
           let station = result.stationInfo[0];
           map.panTo([station.location.lng, station.location.lat]);
-          map.getCity(function (res) {
-            city = res.city ? res.city : res.province;
-            lineSearch.setCity(city);
-            stationSearch.setCity(city);
-            chooseStation(station);
-            $("#curCity").text(city);
-            $("#city_title").text(city);
-          });
+          chooseStation(station);
         } else {
           history.replaceState(null, null, "amap.html");
         }
       });
     }
   });
-  AMap.service(["AMap.PlaceSearch"], function () {
+  AMap.plugin(["AMap.PlaceSearch"], function () {
     placeSearch = new AMap.PlaceSearch({
       type: "公共设施",
-      city: city,
+      city,
       citylimit: true,
       extensions: "all",
       autoFitView: true
     });
+  });
+  AMap.plugin(["AMap.MouseTool"], function () {
+    contextMenu = new AMap.ContextMenu();
+    contextMenu.addItem("附近公交站", function () {
+      disNearStation();
+    }, 0);
+    contextMenu.addItem("测距工具", function () {
+      measure();
+    }, 1);
   });
 }
 var traffic = new AMap.TileLayer.Traffic({
@@ -96,29 +95,34 @@ map.on("zoomend", change);
 map.on("dragend", change);
 map.on("touchend", change);
 map.on("rightclick", function (e) {
-  curCood = e.lnglat;
-  contextMenu.open(map, e.lnglat);
+  curLnglat = e.lnglat;
+  contextMenu.open(map, curLnglat);
 });
 if (style) {
   $("#mapStyle").val(style);
 }
+// 获取当前城市
 function change () {
   map.getCity(function (res) {
     city = res.city ? res.city : res.province;
     lineSearch.setCity(city);
     stationSearch.setCity(city);
+    placeSearch.setCity(city);
     $("#curCity").text(city);
     $("#city_title").text(city);
   });
 }
+// 点击添加路线
 function add () {
-  let line = $("#busList").val().toUpperCase() + "路";
-  enableAutoViewport = true;
-  addLine(line);
+  addLine($("#busList").val(), undefined, true);
   history.replaceState(null, null, "amap.html");
 }
-function addLine (line, lineColor = $("#strokeColor").val()) {
+// 添加路线
+function addLine (line, lineColor = $("#strokeColor").val(), enableAutoViewport) {
   if ($.inArray(line, readyAdd) == -1 || $("#repeat").prop("checked")) {
+    if (new RegExp(/^[0-9a-zA-Z]+$/).test(line)) {
+      line = line.toUpperCase() + "路";
+    }
     lineSearch.search(line, function (status, result) {
       if (status === 'complete' && result.info === 'OK') {
         let direction = $("#busListItem").val();
@@ -128,8 +132,10 @@ function addLine (line, lineColor = $("#strokeColor").val()) {
         let distance = parseFloat(lineArr.distance).toFixed(1);
         let pathArr = lineArr.path;
         let stops = lineArr.via_stops;
+        let startTime = lineArr.stime.slice(0, 2) + ':' + lineArr.stime.slice(2);
+        let endTime = lineArr.etime.slice(0, 2) + ':' + lineArr.etime.slice(2);
         let polyline = new AMap.Polyline({
-          map: map,
+          map,
           path: pathArr,
           strokeColor: lineColor,
           strokeOpacity: $("#strokeOpacity").val(),
@@ -145,7 +151,7 @@ function addLine (line, lineColor = $("#strokeColor").val()) {
           for (let i = 0; i < lineArr.via_stops.length; i++) {
             let poi = stops[i].location;
             let marker = new AMap.CircleMarker({
-              map: map,
+              map,
               center: [poi.lng, poi.lat],
               radius: 4,
               strokeColor: lineColor,
@@ -161,7 +167,7 @@ function addLine (line, lineColor = $("#strokeColor").val()) {
             marker.on("click", function () {
               passBus(stops[i].id).then(function (res) {
                 new AMap.InfoWindow({
-                  content: `<p>${stops[i].name}<span class="info_dis">全程${distance}公里</span></p><p>${name}</p><p class="info_lines">途经公交:${res}</p>`,
+                  content: `<p>${stops[i].name}<span class="info_dis">全程${distance}公里</span><span class="info_dis">首末班${startTime}~${endTime}</span></p><p>${name}</p><p class="info_lines">途经公交:${res}</p>`,
                   offset: new AMap.Pixel(-1, 0),
                   closeWhenClickMap: true
                 }).open(map, poi);
@@ -183,8 +189,8 @@ function addLine (line, lineColor = $("#strokeColor").val()) {
           let marks = map.getAllOverlays();
           for (let i = 0; i < marks.length; i++) {
             if (marks[i].getExtData() == lineName) {
-              marks[i].setMap(null);
-              if (marks[i].CLASS_NAME == "AMap.Polyline") {
+              map.remove(marks[i]);
+              if (marks[i].CLASS_NAME == "Overlay.Polyline") {
                 let index = readyAdd.indexOf(lineName);
                 readyAdd.splice(index, 1);
               }
@@ -199,6 +205,7 @@ function addLine (line, lineColor = $("#strokeColor").val()) {
     alert(`${line}已添加`);
   }
 }
+// 搜索站点
 function search () {
   stationSearch.search($("#stationList").val(), function (status, result) {
     if (status === 'complete' && result.info === 'OK') {
@@ -208,24 +215,24 @@ function search () {
         let searchNum = stationArr.length;
         if (searchNum) {
           clear();
-          enableAutoViewport = false;
           if (searchNum == 1) {
             chooseStation(stationArr[0]);
           } else {
             for (let i = 0; i < searchNum; i++) {
               let marker = new AMap.Marker({
-                map: map,
+                map,
                 position: stationArr[i].location,
                 icon: new AMap.Icon({
                   image: "pic/marker.png",
                   size: new AMap.Size(25, 35),
                   imageSize: new AMap.Size(25, 35)
                 }),
-                title: stationArr[i].name
+                title: stationArr[i].name,
+                offset: new AMap.Pixel(-12.5, -40)
               });
               marker.info = new AMap.InfoWindow({
-                content: `<p>${stationArr[i].name}</p><button onclick='chooseStation(${JSON.stringify(stationArr[i])})' class="info_btn">选择此站点绘制途经公交线网</button>`,
-                offset: new AMap.Pixel(4, -32),
+                content: `<p>${stationArr[i].name}</p><button onclick='chooseStation(${JSON.stringify(stationArr[i])})' class="info_btn">绘制该站点途经公交</button>`,
+                offset: new AMap.Pixel(0, -36),
                 closeWhenClickMap: true
               });
               marker.on("mouseover", function (e) {
@@ -246,6 +253,7 @@ function search () {
     }
   });
 }
+// 查询途经路线
 function passBus (id) {
   return new Promise(function (resolve, reject) {
     stationSearch.searchById(id, function (status, result) {
@@ -264,35 +272,39 @@ function passBus (id) {
     });
   });
 }
+// 绘制指定站点途经路线
 function chooseStation (station) {
   clear();
-  let center = [station.location.lng, station.location.lat];
+  let center = station.location;
   map.setCenter(center);
   let marker = new AMap.Marker({
-    map: map,
+    map,
     position: center,
     icon: new AMap.Icon({
       image: "pic/marker.png",
       size: new AMap.Size(25, 35),
       imageSize: new AMap.Size(25, 35)
     }),
+    offset: new AMap.Pixel(-12.5, -40),
     animation: "AMAP_ANIMATION_DROP"
   });
   let list = "", arr = [], len = station.buslines.length, colors;
   let isRandomColor = $("#randomColor").val() === "true";
   isRandomColor && (colors = createColor(len));
   for (let i = 0; i < len; i++) {
-    let lineName = station.buslines[i].name.replace("(停运)", "").delBrace();
-    if ($.inArray(lineName, arr) == -1) {
-      list = list + lineName + ",";
-      arr.push(lineName);
-      isRandomColor ? addLine(lineName, colors[i]) : addLine(lineName);
+    if (station.buslines[i].name.indexOf("停运") < 0) {
+      let lineName = station.buslines[i].name.delBrace();
+      if ($.inArray(lineName, arr) == -1) {
+        list = list + lineName + ",";
+        arr.push(lineName);
+        isRandomColor ? addLine(lineName, colors[i]) : addLine(lineName);
+      }
     }
   }
   list = list.substring(0, list.length - 1);
   marker.info = new AMap.InfoWindow({
     content: `<p>${station.name}</p><p style="font-size:14px">途经公交:${list}</p>`,
-    offset: new AMap.Pixel(4, -32),
+    offset: new AMap.Pixel(0, -36),
     closeWhenClickMap: true
   });
   marker.on("click", function (e) {
@@ -302,18 +314,20 @@ function chooseStation (station) {
   $("#amount").text(arr.length);
   history.replaceState(null, null, `amap.html?${station.id}`);
 }
+// 从多个站点中选择站点途经路线
 function chooseNearStation (station) {
   clear();
-  let center = [station.location.lng, station.location.lat];
+  let center = station.location;
   map.setCenter(center);
   let marker = new AMap.Marker({
-    map: map,
+    map,
     position: center,
     icon: new AMap.Icon({
       image: "pic/marker.png",
       size: new AMap.Size(25, 35),
       imageSize: new AMap.Size(25, 35)
     }),
+    offset: new AMap.Size(-12.5, -40),
     animation: "AMAP_ANIMATION_DROP"
   });
   let str = station.address;
@@ -322,17 +336,19 @@ function chooseNearStation (station) {
   let isRandomColor = $("#randomColor").val() === "true";
   isRandomColor && (colors = createColor(len));
   for (let i = 0; i < len; i++) {
-    let lineName = buslines[i].replace("(停运)", "").delBrace();
-    if ($.inArray(lineName, arr) == -1) {
-      list = list + lineName + ",";
-      arr.push(lineName);
-      isRandomColor ? addLine(lineName, colors[i]) : addLine(lineName);
+    if (buslines[i].indexOf("停运") < 0) {
+      let lineName = buslines[i].delBrace();
+      if ($.inArray(lineName, arr) == -1) {
+        list = list + lineName + ",";
+        arr.push(lineName);
+        isRandomColor ? addLine(lineName, colors[i]) : addLine(lineName);
+      }
     }
   }
   list = list.substring(0, list.length - 1);
   marker.info = new AMap.InfoWindow({
     content: `<p>${station.name}</p><p style="font-size:14px">途经公交:${list}</p>`,
-    offset: new AMap.Pixel(4, -32),
+    offset: new AMap.Pixel(0, -36),
     closeWhenClickMap: true
   });
   marker.on("click", function (e) {
@@ -340,37 +356,39 @@ function chooseNearStation (station) {
   });
   history.replaceState(null, null, `amap.html?${station.id}`);
 }
+// 查询附近公交站
 function disNearStation () {
   clear();
-  new AMap.Circle({
-    center: curCood,
+  map.add(new AMap.Circle({
+    center: curLnglat,
     radius: 500,
     strokeColor: "#5298ff",
     strokeWeight: 2,
     strokeOpacity: 0.5,
     fillColor: "#5298ff",
     fillOpacity: 0.5
-  }).setMap(map);
-  placeSearch.searchNearBy('公交站', curCood, 500, function (status, result) {
+  }));
+  placeSearch.searchNearBy('公交站', curLnglat, 500, function (status, result) {
     if (status === 'complete' && result.info === 'OK') {
       let stationArr = result.poiList.pois;
       let searchNum = stationArr.length;
-      enableAutoViewport = false;
       for (let i = 0; i < searchNum; i++) {
         let marker = new AMap.Marker({
-          map: map,
+          map,
           position: stationArr[i].location,
           icon: new AMap.Icon({
             image: "pic/marker.png",
             size: new AMap.Size(25, 35),
             imageSize: new AMap.Size(25, 35)
           }),
-          title: stationArr[i].name
+          title: stationArr[i].name,
+          offset: new AMap.Pixel(-12.5, -40)
         });
         marker.info = new AMap.InfoWindow({
-          content: `<p>${stationArr[i].name}</p><button onclick='chooseNearStation(${JSON.stringify(stationArr[i])})' class="info_btn">选择此站点绘制途经公交线网</button>`,
-          offset: new AMap.Pixel(4, -32),
-          closeWhenClickMap: true
+          content: `<p>${stationArr[i].name}</p><button onclick='chooseNearStation(${JSON.stringify(stationArr[i])})' class="info_btn">绘制该站点途经公交</button>`,
+          offset: new AMap.Pixel(0, -36),
+          closeWhenClickMap: true,
+          autoMove: false
         });
         marker.on("mouseover", function (e) {
           e.target.info.open(map, e.target.getPosition());
@@ -426,18 +444,21 @@ $("#addBtn").click(function () {
 $("#searchBtn").click(function () {
   search();
 });
+// 生成随机色
 function createColor (count) {
   return randomColor({
     luminosity: 'blight',
     count
   })
 }
+// 清除所有标记
 function clear () {
   map.clearMap();
   readyAdd.length = 0;
-  brtlist = "";
+  brtlist = null;
   $(".remark").hide();
 }
+// 选择城市
 function chooseCity (adcode) {
   map.setCity(adcode, function (res) {
     if (res) {
@@ -447,6 +468,7 @@ function chooseCity (adcode) {
     }
   });
 }
+// 测距工具
 function measure () {
   contextMenu.close();
   if (!ruler) {
@@ -490,7 +512,6 @@ $("#brtBtn").click(function () {
       success: function (res) {
         if (res) {
           brtlist = res;
-          enableAutoViewport = false;
           let len = brtlist.length, colors;
           let isRandomColor = $("#randomColor").val() === "true";
           isRandomColor && (colors = createColor(len));
