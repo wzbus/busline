@@ -167,7 +167,7 @@ function addLine (line, lineColor = $("#strokeColor").val(), enableAutoViewport)
             marker.on("click", function () {
               passBus(stops[i].id).then(function (res) {
                 new AMap.InfoWindow({
-                  content: `<p>${stops[i].name}<span class="info_dis">全程${distance}公里</span><span class="info_dis">首末班${startTime}~${endTime}</span></p><p>${name}</p><p class="info_lines">途经公交:${res}</p>`,
+                content: `<p class="info_p"><span class="info_name">${stops[i].name}</span><span class="info_dis">全程${distance}公里</span>${startTime ? `<span class="info_dis">首末班&nbsp;${startTime}~${endTime}</span>` : ""}</p><p>${name}</p><p class="info_lines">途经公交:${res}</p>`,
                   offset: new AMap.Pixel(-1, 0),
                   closeWhenClickMap: true
                 }).open(map, poi);
@@ -231,7 +231,7 @@ function search () {
                 offset: new AMap.Pixel(-12.5, -40)
               });
               marker.info = new AMap.InfoWindow({
-                content: `<p>${stationArr[i].name}</p><button onclick='chooseStation(${JSON.stringify(stationArr[i])})' class="info_btn">绘制该站点途经公交</button>`,
+                content: `<p><span>${stationArr[i].name}</span></p><button onclick='chooseStation(${JSON.stringify(stationArr[i])})' class="info_btn">绘制该站点途经公交</button>`,
                 offset: new AMap.Pixel(0, -36),
                 closeWhenClickMap: true
               });
@@ -303,7 +303,7 @@ function chooseStation (station) {
   }
   list = list.substring(0, list.length - 1);
   marker.info = new AMap.InfoWindow({
-    content: `<p>${station.name}</p><p style="font-size:14px">途经公交:${list}</p>`,
+    content: `<p class="info_p"><span class="info_name">${station.name}</span></p><p style="font-size:14px">途经公交:${list}</p>`,
     offset: new AMap.Pixel(0, -36),
     closeWhenClickMap: true
   });
@@ -347,7 +347,7 @@ function chooseNearStation (station) {
   }
   list = list.substring(0, list.length - 1);
   marker.info = new AMap.InfoWindow({
-    content: `<p>${station.name}</p><p style="font-size:14px">途经公交:${list}</p>`,
+    content: `<p class="info_p"><span class="info_name">${station.name}</span></p><p style="font-size:14px">途经公交:${list}</p>`,
     offset: new AMap.Pixel(0, -36),
     closeWhenClickMap: true
   });
@@ -385,7 +385,7 @@ function disNearStation () {
           offset: new AMap.Pixel(-12.5, -40)
         });
         marker.info = new AMap.InfoWindow({
-          content: `<p>${stationArr[i].name}</p><button onclick='chooseNearStation(${JSON.stringify(stationArr[i])})' class="info_btn">绘制该站点途经公交</button>`,
+          content: `<p><span>${stationArr[i].name}</span></p><button onclick='chooseNearStation(${JSON.stringify(stationArr[i])})' class="info_btn">绘制该站点途经公交</button>`,
           offset: new AMap.Pixel(0, -36),
           closeWhenClickMap: true,
           autoMove: false
@@ -522,7 +522,7 @@ $("#brtBtn").click(function () {
           }
           history.replaceState(null, null, "amap.html");
         } else {
-          alert("当前城市无快速公交BRT路线");
+          alert("当前城市无快速公交BRT路线数据");
         }
       },
       error: function () {
@@ -530,7 +530,7 @@ $("#brtBtn").click(function () {
       }
     });
   } else {
-    alert("已添加BRT路线，请清除所有标识后重试");
+    alert("已添加BRT路线，请清除所有标识后再试");
   }
 });
 $("#cityBtn").click(function () {

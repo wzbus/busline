@@ -128,6 +128,7 @@ button {
   line-height: 32px;
   font-size: 12px;
   float: right;
+  cursor: pointer;
 }
 .main {
   padding: 0 10px;
@@ -393,6 +394,17 @@ button {
 }
 .cityBox dl dd li:hover {
   color: #5298ff;
+}
+.amap-info-outer {
+  max-width: 350px;
+}
+.info_p {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.info_name {
+  color: #5298FF;
 }
 .info_lines {
   margin-top: 5px;
